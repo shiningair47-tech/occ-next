@@ -5,16 +5,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, FunnelChart, Funnel, LabelList,
 } from "recharts";
-
-interface Lead {
-  team: string; setter: string; closer: string;
-  setter_status: string; closer_status: string; assigned_at: string;
-}
-
+import { Lead } from "@/types";
 function Kpi({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4">
-      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-[#d4af37]" /></div>
+      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-gold" /></div>
       <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">{label}</p>
       <p className="text-2xl font-bold text-[#1a1a1a] mt-1.5 tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{value}</p>
     </div>
@@ -140,7 +135,7 @@ export default function ReportsPage() {
           <div className="flex items-center gap-2 flex-wrap">
             {RANGES.map(r => (
               <button key={r.value} onClick={() => setRange(r.value)}
-                className={`px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${range === r.value ? "bg-[#1a1a1a] text-[#d4af37] border-[#d4af37]/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
+                className={`px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${range === r.value ? "bg-[#1a1a1a] text-gold border-gold/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
                 {r.label}
               </button>
             ))}
@@ -212,3 +207,6 @@ export default function ReportsPage() {
     </div>
   );
 }
+
+
+

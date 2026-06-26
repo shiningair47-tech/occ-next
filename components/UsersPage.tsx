@@ -5,11 +5,8 @@ import {
   Trash2, UserX, CircleAlert, CircleCheck, ChevronDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { ApiUser } from "@/types";
 
-interface User {
-  email: string; name: string; role: string; team: string;
-  temp_password: boolean; active: boolean;
-}
 interface PairAssignment {
   name: string; setter: string; closer: string; status: string; members: number;
 }
@@ -18,7 +15,7 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4">
       <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4">
-        <Icon className="h-4 w-4 text-[#d4af37]" />
+        <Icon className="h-4 w-4 text-gold" />
       </div>
       <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">{label}</p>
       <p className="text-2xl font-bold text-[#1a1a1a] mt-1.5 tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{value}</p>
@@ -27,9 +24,9 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 }
 
 function RoleBadge({ role }: { role: string }) {
-  if (role === "admin") return <span className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-[#1a1a1a] text-[#d4af37] border-[#d4af37]/40 w-fit">Admin</span>;
+  if (role === "admin") return <span className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-[#1a1a1a] text-gold border-gold/40 w-fit">Admin</span>;
   if (role === "setter") return <span className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-blue-50 text-blue-700 border-blue-200 w-fit">Setter</span>;
-  return <span className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-[#d4af37]/10 text-[#8a6d1a] border-[#d4af37]/30 w-fit">Closer</span>;
+  return <span className="inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-gold/10 text-gold-dark border-gold/30 w-fit">Closer</span>;
 }
 
 function StatusBadge({ active, temp }: { active: boolean; temp: boolean }) {
@@ -48,7 +45,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   return (
     <button onClick={onClick}
       className={active
-        ? "px-3.5 py-2 rounded-full bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 transition-all text-xs font-medium tracking-wide"
+        ? "px-3.5 py-2 rounded-full bg-[#1a1a1a] text-gold border border-gold/40 transition-all text-xs font-medium tracking-wide"
         : "px-3.5 py-2 rounded-full bg-white text-neutral-600 border border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a] transition-all text-xs font-medium tracking-wide"}>
       {label}
     </button>
@@ -185,12 +182,12 @@ export default function UsersPage() {
               <div>
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">DISPLAY NAME</p>
                 <input type="text" value={regName} onChange={e => setRegName(e.target.value)} placeholder="Full name" required
-                  className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
               <div>
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">EMAIL ADDRESS</p>
                 <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="user@example.com" required
-                  className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -198,7 +195,7 @@ export default function UsersPage() {
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">ROLE</p>
                 <div className="relative">
                   <select value={regRole} onChange={e => setRegRole(e.target.value)}
-                    className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                    className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                     <option value="setter">Setter</option>
                     <option value="closer">Closer</option>
                   </select>
@@ -210,7 +207,7 @@ export default function UsersPage() {
                 {teams.length > 0 ? (
                   <div className="relative">
                     <select value={regTeam} onChange={e => setRegTeam(e.target.value)} required
-                      className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                      className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                       {teams.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                     <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
@@ -226,7 +223,7 @@ export default function UsersPage() {
             <div className="mb-4">
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">TEMPORARY PASSWORD</p>
               <input type="text" value={regTempPw} onChange={e => setRegTempPw(e.target.value)} placeholder="Any temporary password (e.g. Welcome1)" required
-                className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               <p className="text-[11px] text-neutral-500 mt-1.5">The user will set a strong permanent password on first login.</p>
             </div>
             {regError && (
@@ -243,7 +240,7 @@ export default function UsersPage() {
             )}
             <div className="flex items-center gap-2">
               <button type="submit" disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
+                className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
                 <UserPlus className="h-4 w-4" />
                 <span className="text-sm font-semibold tracking-wide">{loading ? "Registering…" : "Register User"}</span>
               </button>
@@ -263,7 +260,7 @@ export default function UsersPage() {
               <div key={p.name} className="bg-white border border-neutral-200 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-8 w-8 rounded-md bg-[#1a1a1a] flex items-center justify-center">
-                    <Users className="h-4 w-4 text-[#d4af37]" />
+                    <Users className="h-4 w-4 text-gold" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#1a1a1a]">{p.name}</p>
@@ -323,7 +320,7 @@ export default function UsersPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-[#d4af37]">{u.name[0]}</span>
+                        <span className="text-xs font-bold text-gold">{u.name[0]}</span>
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-[#1a1a1a]">{u.name}</p>
@@ -340,11 +337,11 @@ export default function UsersPage() {
                     ) : (
                       <div className="flex items-center gap-2 flex-wrap">
                         <button onClick={() => { setEditEmail(editEmail === u.email ? "" : u.email); setEditError(""); }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
                           <Pencil className="h-3 w-3" /><span>Edit</span>
                         </button>
                         <button onClick={() => doAction("reset_password", u.email, { tempPassword: "Reset@2025" })}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-[#d4af37] text-[10px] font-semibold transition-colors">
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-gold text-[10px] font-semibold transition-colors">
                           <KeyRound className="h-3 w-3" /><span>Reset</span>
                         </button>
                         {u.active ? (
@@ -364,19 +361,19 @@ export default function UsersPage() {
                 </tr>
                 {editEmail === u.email && (
                   <tr key={`edit-${u.email}`} className="border-b border-neutral-100">
-                    <td colSpan={5} className="px-4 py-4 bg-[#faf8f3] border-t border-[#d4af37]/30">
+                    <td colSpan={5} className="px-4 py-4 bg-[#faf8f3] border-t border-gold/30">
                       <form onSubmit={e => handleSaveEdit(e, u)} className="w-full">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
                           <div>
                             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">DISPLAY NAME</p>
                             <input name="name" type="text" defaultValue={u.name} required
-                              className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none" />
+                              className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none" />
                           </div>
                           <div>
                             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">ROLE</p>
                             <div className="relative">
                               <select name="role" defaultValue={u.role}
-                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none">
+                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none">
                                 <option value="setter">Setter</option>
                                 <option value="closer">Closer</option>
                               </select>
@@ -387,7 +384,7 @@ export default function UsersPage() {
                             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">TEAM</p>
                             <div className="relative">
                               <select name="team" defaultValue={u.team}
-                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none">
+                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none">
                                 <option value="">— Unassigned —</option>
                                 {teams.map(t => <option key={t} value={t}>{t}</option>)}
                               </select>
@@ -398,7 +395,7 @@ export default function UsersPage() {
                             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">ACTIVE STATUS</p>
                             <div className="relative">
                               <select name="active" defaultValue={u.active ? "true" : "false"}
-                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none">
+                                className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none">
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                               </select>
@@ -414,7 +411,7 @@ export default function UsersPage() {
                         )}
                         <div className="flex items-center gap-2 flex-wrap">
                           <button type="submit"
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[11px] font-semibold transition-colors">
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[11px] font-semibold transition-colors">
                             <Save className="h-3.5 w-3.5" /><span>Save Changes</span>
                           </button>
                           <button type="button" onClick={() => { setEditEmail(""); setEditError(""); }}
@@ -438,3 +435,6 @@ export default function UsersPage() {
     </div>
   );
 }
+
+
+

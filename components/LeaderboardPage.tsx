@@ -11,7 +11,7 @@ interface TeamRow {
 function Kpi({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4">
-      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-[#d4af37]" /></div>
+      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-gold" /></div>
       <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">{label}</p>
       <p className="text-2xl font-bold text-[#1a1a1a] mt-1.5 tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{value}</p>
     </div>
@@ -20,8 +20,8 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string | numb
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#d4af37]/10 border border-[#d4af37]/30 w-fit">
-      <Crown className="h-4 w-4 text-[#d4af37]" /><span className="text-xs font-bold text-[#8a6d1a]">1st</span>
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/10 border border-gold/30 w-fit">
+      <Crown className="h-4 w-4 text-gold" /><span className="text-xs font-bold text-gold-dark">1st</span>
     </div>
   );
   if (rank === 2) return (
@@ -92,13 +92,13 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
     <div>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.3em] text-[#d4af37]">TEAM STANDINGS</p>
+          <p className="text-[10px] font-semibold tracking-[0.3em] text-gold">TEAM STANDINGS</p>
           <h2 className="text-2xl font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif] mt-1">Team Leaderboard</h2>
           <p className="text-sm text-neutral-500 mt-1">{subtitles[effectiveRole] ?? subtitles.admin}</p>
         </div>
         {userTeam && (
-          <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-[#d4af37]/30 w-fit">
-            <Users className="h-3.5 w-3.5 text-[#d4af37]" />
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-gold/30 w-fit">
+            <Users className="h-3.5 w-3.5 text-gold" />
             <span className="text-[10px] font-semibold tracking-[0.25em] text-neutral-500">YOUR TEAM · </span>
             <span className="text-[11px] font-bold tracking-wide text-[#1a1a1a]">{userTeam}</span>
           </div>
@@ -126,13 +126,13 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
               {teams.map(t => {
                 const isMyTeam = t.name === userTeam;
                 return (
-                  <tr key={t.name} className={`border-b border-neutral-100 hover:bg-[#faf8f3] transition-colors ${isMyTeam ? "bg-[#d4af37]/5" : ""}`}>
+                  <tr key={t.name} className={`border-b border-neutral-100 hover:bg-[#faf8f3] transition-colors ${isMyTeam ? "bg-gold/5" : ""}`}>
                     <td className="px-4 py-4 whitespace-nowrap align-middle"><RankBadge rank={t.rank} /></td>
-                    <td className={`px-4 py-4 whitespace-nowrap align-middle ${isMyTeam ? "bg-[#d4af37]/5" : ""}`}>
+                    <td className={`px-4 py-4 whitespace-nowrap align-middle ${isMyTeam ? "bg-gold/5" : ""}`}>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-semibold text-[#1a1a1a]">{t.name}</p>
-                          {isMyTeam && <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase border bg-[#d4af37]/10 text-[#8a6d1a] border-[#d4af37]/40 w-fit">YOUR TEAM</span>}
+                          {isMyTeam && <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase border bg-gold/10 text-gold-dark border-gold/40 w-fit">YOUR TEAM</span>}
                         </div>
                         <p className="text-xs text-neutral-500 mt-0.5">Setter: {t.setter || "—"} · Closer: {t.closer || "—"}</p>
                       </div>
@@ -156,3 +156,5 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
     </div>
   );
 }
+
+

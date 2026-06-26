@@ -159,7 +159,7 @@ export default function TeamsPage() {
       <div className="bg-white border border-neutral-200 rounded-lg p-5 mb-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center">
-            <Plus className="h-4 w-4 text-[#d4af37]" />
+            <Plus className="h-4 w-4 text-gold" />
           </div>
           <div>
             <h3 className="text-base font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Create New Team</h3>
@@ -172,10 +172,10 @@ export default function TeamsPage() {
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">TEAM NAME</p>
               <input type="text" value={newTeamName} onChange={e => { setNewTeamName(e.target.value); setCreateError(""); }}
                 placeholder="e.g. Pair Atlas" maxLength={40} required
-                className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                className="w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
             </div>
             <button type="submit"
-              className="self-end flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors h-[42px]">
+              className="self-end flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] transition-colors h-[42px]">
               <Plus className="h-4 w-4" />
               <span className="text-sm font-semibold tracking-wide">Create Team</span>
             </button>
@@ -211,7 +211,7 @@ export default function TeamsPage() {
                   <div className="flex items-start justify-between gap-2 mb-4">
                     <div className="flex items-start gap-3">
                       <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                        <Users className="h-4 w-4 text-[#d4af37]" />
+                        <Users className="h-4 w-4 text-gold" />
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <p className="text-base font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{t.name}</p>
@@ -230,14 +230,14 @@ export default function TeamsPage() {
                   <div className="mb-3">
                     <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">SETTER</p>
                     {t.setter_name ? (
-                      <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-[#faf8f3] border border-[#d4af37]/20 rounded-md">
+                      <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-[#faf8f3] border border-gold/20 rounded-md">
                         <div className="flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-[#d4af37]">{t.setter_name[0]}</span>
+                            <span className="text-xs font-bold text-gold">{t.setter_name[0]}</span>
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-[#1a1a1a]">{t.setter_name}</p>
-                            <p className="text-[10px] font-semibold tracking-[0.25em] text-[#8a6d1a]">SETTER</p>
+                            <p className="text-[10px] font-semibold tracking-[0.25em] text-gold-dark">SETTER</p>
                           </div>
                         </div>
                         <button onClick={() => handleUnassign(t.setter_email)}
@@ -250,14 +250,14 @@ export default function TeamsPage() {
                         <div className="relative flex-1">
                           <select value={setterSelect}
                             onChange={e => setAssignSelects(p => ({ ...p, [`${t.name}_setter`]: e.target.value }))}
-                            className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                            className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                             <option value="" disabled>— Choose a setter —</option>
                             {setterOptions.map(o => <option key={o.email} value={o.email}>{o.label}</option>)}
                           </select>
                           <ChevronDown className="h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
                         </div>
                         <button onClick={() => { handleAssign(t.name, "setter", setterSelect); setAssignSelects(p => ({ ...p, [`${t.name}_setter`]: "" })); }}
-                          className="flex items-center gap-1 px-3 py-2 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
+                          className="flex items-center gap-1 px-3 py-2 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
                           <UserPlus className="h-3 w-3" /><span>Assign</span>
                         </button>
                       </div>
@@ -268,14 +268,14 @@ export default function TeamsPage() {
                   <div>
                     <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">CLOSER</p>
                     {t.closer_name ? (
-                      <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-[#faf8f3] border border-[#d4af37]/20 rounded-md">
+                      <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-[#faf8f3] border border-gold/20 rounded-md">
                         <div className="flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-[#d4af37]">{t.closer_name[0]}</span>
+                            <span className="text-xs font-bold text-gold">{t.closer_name[0]}</span>
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-[#1a1a1a]">{t.closer_name}</p>
-                            <p className="text-[10px] font-semibold tracking-[0.25em] text-[#8a6d1a]">CLOSER</p>
+                            <p className="text-[10px] font-semibold tracking-[0.25em] text-gold-dark">CLOSER</p>
                           </div>
                         </div>
                         <button onClick={() => handleUnassign(t.closer_email)}
@@ -288,14 +288,14 @@ export default function TeamsPage() {
                         <div className="relative flex-1">
                           <select value={closerSelect}
                             onChange={e => setAssignSelects(p => ({ ...p, [`${t.name}_closer`]: e.target.value }))}
-                            className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                            className="appearance-none w-full px-3 py-2 pr-8 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                             <option value="" disabled>— Choose a closer —</option>
                             {closerOptions.map(o => <option key={o.email} value={o.email}>{o.label}</option>)}
                           </select>
                           <ChevronDown className="h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
                         </div>
                         <button onClick={() => { handleAssign(t.name, "closer", closerSelect); setAssignSelects(p => ({ ...p, [`${t.name}_closer`]: "" })); }}
-                          className="flex items-center gap-1 px-3 py-2 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
+                          className="flex items-center gap-1 px-3 py-2 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
                           <UserPlus className="h-3 w-3" /><span>Assign</span>
                         </button>
                       </div>
@@ -308,7 +308,7 @@ export default function TeamsPage() {
         ) : (
           <div className="bg-white border border-dashed border-neutral-200 rounded-lg p-12">
             <div className="h-14 w-14 rounded-full bg-[#1a1a1a] flex items-center justify-center mx-auto mb-4">
-              <Users className="h-6 w-6 text-[#d4af37]" />
+              <Users className="h-6 w-6 text-gold" />
             </div>
             <p className="text-base font-bold text-[#1a1a1a] text-center font-['Adorn_Condensed','Halis','Inter',sans-serif]">No teams yet</p>
             <p className="text-xs text-neutral-500 text-center mt-1.5 max-w-sm mx-auto">Create your first team using the form above to start routing leads.</p>
@@ -318,3 +318,5 @@ export default function TeamsPage() {
     </div>
   );
 }
+
+

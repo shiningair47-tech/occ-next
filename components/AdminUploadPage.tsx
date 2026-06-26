@@ -2,30 +2,13 @@
 import { useState, useEffect } from "react";
 import { ScanLine, CircleCheck, PackageOpen, Download, Sparkles, User, CircleAlert, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
+import { parsePaste, ParsedLead } from "@/lib/parsePaste";
 
-interface ParsedLead { name: string; phone: string; }
 interface BatchRow { id: string; label: string; team: string; setter: string; closer: string; source: string; lead_count: number; assigned_date: string; assigned_at: string; uploaded_by: string; origin: string; }
 interface TeamInfo { name: string; setter: string; closer: string; status: string; }
 
 const SOURCE_OPTIONS = ["Facebook", "Instagram", "Google Ads", "Referral", "WhatsApp", "TikTok", "Walk-in", "Other"];
 
-function parsePaste(text: string): ParsedLead[] {
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-  const leads: ParsedLead[] = [];
-  const phoneRe = /(\+?[\d\s\-().]{7,20})/g;
-  const seen = new Set<string>();
-  for (const line of lines) {
-    const phones = line.match(phoneRe);
-    if (!phones) continue;
-    const phone = phones[0].replace(/\s+/g, " ").trim();
-    const normalised = phone.replace(/\D/g, "");
-    if (seen.has(normalised) || normalised.length < 7) continue;
-    seen.add(normalised);
-    const name = line.replace(phoneRe, "").replace(/[-—–·,|]+/g, " ").trim() || "Unknown";
-    leads.push({ name, phone });
-  }
-  return leads;
-}
 
 const SAMPLE = `Vikram Singh — +91 98765 43210
 Anjali Reddy - +91 91234 56789
@@ -123,16 +106,16 @@ export default function AdminUploadPage() {
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">PASTE LEADS</p>
             <button onClick={() => { setPasteText(SAMPLE); setParsedLeads([]); setConfirmation(""); }}
-              className="flex items-center gap-1.5 text-[10px] tracking-[0.2em] font-semibold text-[#8a6d1a] hover:text-[#1a1a1a] transition-colors">
+              className="flex items-center gap-1.5 text-[10px] tracking-[0.2em] font-semibold text-gold-dark hover:text-[#1a1a1a] transition-colors">
               <Sparkles className="h-3 w-3" /><span>Load sample</span>
             </button>
           </div>
           <textarea value={pasteText} onChange={e => { setPasteText(e.target.value); setParsedLeads([]); setConfirmation(""); }}
             placeholder={`Aditya Bansal — +91 98101 20011\nPooja Iyer - +91 99001 23344\n+91 91234 88990`}
-            className="w-full h-56 px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono leading-relaxed focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 resize-none" />
+            className="w-full h-56 px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono leading-relaxed focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none" />
           <div className="flex items-center gap-2 mt-3">
             <button onClick={handleParse}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#1a1a1a] text-[#d4af37] text-sm font-semibold border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#1a1a1a] text-gold text-sm font-semibold border border-gold/40 hover:bg-[#2a2a2a] transition-colors">
               <ScanLine className="h-4 w-4" /><span>Parse Leads</span>
             </button>
             <button onClick={() => { setPasteText(""); setParsedLeads([]); setConfirmation(""); }}
@@ -148,7 +131,7 @@ export default function AdminUploadPage() {
             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">SOURCE TAG</p>
             <div className="relative">
               <select value={source} onChange={e => setSource(e.target.value)}
-                className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                 {SOURCE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
               <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
@@ -159,7 +142,7 @@ export default function AdminUploadPage() {
             {teams.length > 0 ? (
               <div className="relative">
                 <select value={uploadPair} onChange={e => setUploadPair(e.target.value)}
-                  className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30">
+                  className="appearance-none w-full px-3.5 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30">
                   {teams.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
                 </select>
                 <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
@@ -176,14 +159,14 @@ export default function AdminUploadPage() {
             <div className="flex gap-2">
               <div className="flex-1 p-3 bg-white border border-neutral-200 rounded-md">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <User className="h-3.5 w-3.5 text-[#d4af37]" />
+                  <User className="h-3.5 w-3.5 text-gold" />
                   <span className="text-[10px] font-semibold tracking-[0.2em] text-neutral-500">Setter</span>
                 </div>
                 <p className="text-sm font-semibold text-[#1a1a1a]">{selectedTeam?.setter || <span className="text-neutral-400 italic text-sm font-normal">Unassigned</span>}</p>
               </div>
               <div className="flex-1 p-3 bg-white border border-neutral-200 rounded-md">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <User className="h-3.5 w-3.5 text-[#d4af37]" />
+                  <User className="h-3.5 w-3.5 text-gold" />
                   <span className="text-[10px] font-semibold tracking-[0.2em] text-neutral-500">Closer</span>
                 </div>
                 <p className="text-sm font-semibold text-[#1a1a1a]">{selectedTeam?.closer || <span className="text-neutral-400 italic text-sm font-normal">Unassigned</span>}</p>
@@ -285,7 +268,7 @@ export default function AdminUploadPage() {
                     </td>
                     <td className="px-4 py-3">
                       <button onClick={() => exportCSV(b)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-[#d4af37] hover:text-[#1a1a1a] text-[10px] font-semibold transition-colors">
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-gold hover:text-[#1a1a1a] text-[10px] font-semibold transition-colors">
                         <Download className="h-3 w-3" /><span>Export</span>
                       </button>
                     </td>
@@ -304,3 +287,7 @@ export default function AdminUploadPage() {
     </div>
   );
 }
+
+
+
+

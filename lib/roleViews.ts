@@ -1,15 +1,4 @@
-import { Role } from "@/types";
-
-export type ViewKey =
-  | "dashboard"
-  | "upload"
-  | "users"
-  | "teams"
-  | "replacements"
-  | "reports"
-  | "leaderboard"
-  | "queue"
-  | "pipeline";
+﻿import { Role, ViewKey } from "@/types";
 
 const ALLOWED: Record<Role, ViewKey[]> = {
   admin: ["dashboard", "upload", "users", "teams", "replacements", "reports", "leaderboard"],

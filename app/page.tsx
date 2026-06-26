@@ -11,8 +11,8 @@ import CloserPipelinePage from "@/components/CloserPipelinePage";
 import ReplacementsPage from "@/components/ReplacementsPage";
 import LeaderboardPage from "@/components/LeaderboardPage";
 import ReportsPage from "@/components/ReportsPage";
-import { ViewKey, allowedViewsFor } from "@/lib/roleViews";
-import { MemberPreviewOption, Role } from "@/types";
+import { allowedViewsFor } from "@/lib/roleViews";
+import { ViewKey, MemberPreviewOption, Role } from "@/types";
 
 interface IdentityInfo {
   currentUser: { email: string; name: string; role: string; team: string };
@@ -100,7 +100,7 @@ export default function Home() {
       <div className="min-h-screen bg-[#fdfbf6] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 rounded-md bg-[#1a1a1a] flex items-center justify-center animate-pulse">
-            <span className="text-[#d4af37] text-lg font-bold">S</span>
+            <span className="text-gold text-lg font-bold">S</span>
           </div>
           <p className="text-sm text-neutral-500 tracking-wide">Loading workspace…</p>
         </div>
@@ -145,3 +145,5 @@ export default function Home() {
     </Shell>
   );
 }
+
+

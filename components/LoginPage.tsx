@@ -80,14 +80,14 @@ export default function LoginPage({ onLogin }: Props) {
         <div className="max-w-md">
           <div className="flex items-center gap-3 mb-12">
             <div className="h-12 w-12 rounded-md bg-[#1a1a1a] flex items-center justify-center">
-              <Gem className="h-6 w-6 text-[#d4af37]" />
+              <Gem className="h-6 w-6 text-gold" />
             </div>
             <div>
               <p className="text-xl font-bold tracking-[0.25em] text-white leading-none font-['Adorn_Condensed','Halis','Inter',sans-serif]">SHINING</p>
-              <p className="text-[12px] font-medium tracking-[0.35em] text-[#d4af37] mt-1.5">OVERSEAS</p>
+              <p className="text-[12px] font-medium tracking-[0.35em] text-gold mt-1.5">OVERSEAS</p>
             </div>
           </div>
-          <p className="text-[11px] font-semibold tracking-[0.35em] text-[#d4af37] mb-3">LEAD ENGINE</p>
+          <p className="text-[11px] font-semibold tracking-[0.35em] text-gold mb-3">LEAD ENGINE</p>
           <h1 className="text-4xl xl:text-5xl font-bold text-white tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif] leading-[1.05] mb-5">
             Operations Command Center
           </h1>
@@ -96,15 +96,15 @@ export default function LoginPage({ onLogin }: Props) {
           </p>
           <div className="flex flex-col gap-3 mt-10 pt-8 border-t border-white/10">
             <div className="flex items-center gap-2.5">
-              <Shield className="h-4 w-4 text-[#d4af37] shrink-0" />
+              <Shield className="h-4 w-4 text-gold shrink-0" />
               <p className="text-xs text-neutral-400">Admin-controlled access · local-only authentication</p>
             </div>
             <div className="flex items-center gap-2.5">
-              <Users className="h-4 w-4 text-[#d4af37] shrink-0" />
+              <Users className="h-4 w-4 text-gold shrink-0" />
               <p className="text-xs text-neutral-400">Roles for admins, setters, and closers</p>
             </div>
             <div className="flex items-center gap-2.5">
-              <KeyRound className="h-4 w-4 text-[#d4af37] shrink-0" />
+              <KeyRound className="h-4 w-4 text-gold shrink-0" />
               <p className="text-xs text-neutral-400">First-login password setup for new accounts</p>
             </div>
           </div>
@@ -120,15 +120,15 @@ export default function LoginPage({ onLogin }: Props) {
           {/* Mobile brand */}
           <div className="flex lg:hidden items-center gap-3 mb-10">
             <div className="h-10 w-10 rounded-md bg-[#1a1a1a] flex items-center justify-center">
-              <Gem className="h-5 w-5 text-[#d4af37]" />
+              <Gem className="h-5 w-5 text-gold" />
             </div>
             <div>
               <p className="text-[15px] font-bold tracking-[0.2em] text-[#1a1a1a] leading-none font-['Adorn_Condensed','Halis','Inter',sans-serif]">SHINING</p>
-              <p className="text-[10px] font-medium tracking-[0.3em] text-[#d4af37] mt-1">OVERSEAS</p>
+              <p className="text-[10px] font-medium tracking-[0.3em] text-gold mt-1">OVERSEAS</p>
             </div>
           </div>
 
-          <p className="text-[10px] font-semibold tracking-[0.3em] text-[#d4af37] mb-2">WELCOME BACK</p>
+          <p className="text-[10px] font-semibold tracking-[0.3em] text-gold mb-2">WELCOME BACK</p>
           <h2 className="text-3xl font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif] mb-2">
             {showReset ? "Update your password" : "Sign in to your workspace"}
           </h2>
@@ -140,9 +140,9 @@ export default function LoginPage({ onLogin }: Props) {
 
           {showReset ? (
             <form onSubmit={handleResetPassword} className="w-full">
-              <div className="mb-5 p-3 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-md">
+              <div className="mb-5 p-3 bg-gold/10 border border-gold/30 rounded-md">
                 <div className="flex items-center gap-2 mb-1">
-                  <KeyRound className="h-4 w-4 text-[#8a6d1a]" />
+                  <KeyRound className="h-4 w-4 text-gold-dark" />
                   <p className="text-sm font-semibold text-[#1a1a1a]">Set a new password</p>
                 </div>
                 <p className="text-xs text-neutral-500">You&apos;re signing in with a temporary password. Choose a new password to continue.</p>
@@ -151,13 +151,13 @@ export default function LoginPage({ onLogin }: Props) {
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">NEW PASSWORD</p>
                 <input type="password" value={newPassword} onChange={e => { setNewPassword(e.target.value); setResetError(""); }}
                   placeholder="At least 8 characters" autoComplete="new-password" required
-                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
               <div className="mb-3">
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">CONFIRM PASSWORD</p>
                 <input type="password" value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); setResetError(""); }}
                   placeholder="Re-enter your new password" autoComplete="new-password" required
-                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
               <div className="mb-4">
                 <p className="text-[11px] text-neutral-500">• Minimum 8 characters</p>
@@ -175,7 +175,7 @@ export default function LoginPage({ onLogin }: Props) {
                   Cancel
                 </button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
                   <CircleCheck className="h-4 w-4" />
                   <span className="text-sm font-semibold tracking-wide">{loading ? "Updating…" : "Update Password"}</span>
                 </button>
@@ -186,14 +186,14 @@ export default function LoginPage({ onLogin }: Props) {
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">EMAIL ADDRESS</p>
                 <input type="email" value={email} onChange={e => { setEmail(e.target.value); setLoginError(""); }}
-                  placeholder="you@example.com" autoComplete="email" required
-                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  placeholder="you@example.com" autoComplete="email" autoFocus required
+                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">PASSWORD</p>
                 <input type="password" value={password} onChange={e => { setPassword(e.target.value); setLoginError(""); }}
                   placeholder="Enter your password" autoComplete="current-password" required
-                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30" />
+                  className="w-full px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
               </div>
               {loginError && (
                 <div className="flex items-start gap-2 px-3 py-2.5 mb-4 bg-red-50 border border-red-200 rounded-md">
@@ -202,13 +202,13 @@ export default function LoginPage({ onLogin }: Props) {
                 </div>
               )}
               <button type="submit" disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] transition-colors disabled:opacity-60">
                 <LogIn className="h-4 w-4" />
                 <span className="text-sm font-semibold tracking-wide">{loading ? "Signing in…" : "Sign In"}</span>
               </button>
-              <div className="mt-8 p-3.5 bg-[#faf8f3] border border-[#d4af37]/20 rounded-md">
+              <div className="mt-8 p-3.5 bg-[#faf8f3] border border-gold/20 rounded-md">
                 <div className="flex items-start gap-2">
-                  <Info className="h-3.5 w-3.5 text-[#8a6d1a] shrink-0 mt-0.5" />
+                  <Info className="h-3.5 w-3.5 text-gold-dark shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs font-semibold text-[#1a1a1a]">Need an account?</p>
                     <p className="text-[11px] text-neutral-600 mt-0.5 leading-relaxed">
@@ -224,3 +224,6 @@ export default function LoginPage({ onLogin }: Props) {
     </div>
   );
 }
+
+
+

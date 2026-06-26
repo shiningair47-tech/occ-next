@@ -11,10 +11,10 @@ function KpiCard({ label, value, change, icon: Icon, positive = true }: {
   label: string; value: string; change: string; icon: React.ElementType; positive?: boolean;
 }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-lg p-5 hover:border-[#d4af37]/50 transition-colors">
+    <div className="bg-white border border-neutral-200 rounded-lg p-5 hover:border-gold/50 transition-colors">
       <div className="flex items-center justify-between mb-5">
         <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center">
-          <Icon className="h-4 w-4 text-[#d4af37]" />
+          <Icon className="h-4 w-4 text-gold" />
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold tracking-wide border ${
           positive
@@ -41,7 +41,7 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle: string }) 
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  gold: "bg-[#d4af37]/10 text-[#8a6d1a] border-[#d4af37]/30",
+  gold: "bg-gold/10 text-gold-dark border-gold/30",
   green: "bg-emerald-50 text-emerald-700 border-emerald-200",
   red: "bg-red-50 text-red-700 border-red-200",
   blue: "bg-blue-50 text-blue-700 border-blue-200",
@@ -78,7 +78,7 @@ function TeamRow({ name, leads, rate, status, color }: { name: string; leads: st
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-[#1a1a1a] flex items-center justify-center">
-            <span className="text-xs font-bold text-[#d4af37]">{name[0]}</span>
+            <span className="text-xs font-bold text-gold">{name[0]}</span>
           </div>
           <span className="text-sm font-medium text-[#1a1a1a]">{name}</span>
         </div>
@@ -135,7 +135,7 @@ export function AdminDashboard({ oversight }: { oversight?: ReactNode }) {
           <SectionTitle title="Pipeline Snapshot" subtitle="Current lead distribution" />
           <div className="bg-white border border-neutral-200 rounded-lg p-5">
             <ProgressRow label="Pending" count="428" value={72} color="bg-neutral-400" />
-            <ProgressRow label="Qualified" count="312" value={55} color="bg-[#d4af37]" />
+            <ProgressRow label="Qualified" count="312" value={55} color="bg-gold" />
             <ProgressRow label="Hot Pipeline" count="184" value={38} color="bg-orange-400" />
             <ProgressRow label="Arrived" count="68" value={18} color="bg-emerald-500" />
           </div>
@@ -157,7 +157,7 @@ function QueueItem({ name, phone, source, time }: { name: string; phone: string;
     <div className="flex items-center justify-between p-4 border-b border-neutral-100 hover:bg-[#faf8f3] transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-          <span className="text-sm font-bold text-[#d4af37]">{name[0]}</span>
+          <span className="text-sm font-bold text-gold">{name[0]}</span>
         </div>
         <div>
           <p className="text-sm font-semibold text-[#1a1a1a]">{name}</p>
@@ -200,7 +200,7 @@ export function SetterDashboard() {
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mt-1">QUALIFIED LEADS</p>
             </div>
             <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-              <div className="h-full bg-[#d4af37] rounded-full" style={{ width: "73%" }} />
+              <div className="h-full bg-gold rounded-full" style={{ width: "73%" }} />
             </div>
             <p className="text-xs text-neutral-500 mt-3 text-center">73% of daily target reached</p>
           </div>
@@ -224,10 +224,10 @@ function PipelineCard({ name, phone, status, color, touchpoints }: {
   name: string; phone: string; status: string; color: string; touchpoints: number;
 }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-[#d4af37]/50 transition-colors">
+    <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/50 transition-colors">
       <div className="flex items-center gap-3 mb-4">
         <div className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-          <span className="text-sm font-bold text-[#d4af37]">{name[0]}</span>
+          <span className="text-sm font-bold text-gold">{name[0]}</span>
         </div>
         <div>
           <p className="text-sm font-semibold text-[#1a1a1a]">{name}</p>
@@ -241,7 +241,7 @@ function PipelineCard({ name, phone, status, color, touchpoints }: {
           {Array.from({ length: 6 }, (_, i) => (
             <div key={i} className={`h-7 w-7 rounded-full flex items-center justify-center ${
               i < touchpoints
-                ? "bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40"
+                ? "bg-[#1a1a1a] text-gold border border-gold/40"
                 : "bg-neutral-50 text-neutral-300 border border-neutral-200"
             }`}>
               <span className="text-[10px] font-bold">T{i+1}</span>
@@ -297,8 +297,8 @@ export function CloserDashboard() {
                 { day: "WED", date: "20", name: "Sneha Kulkarni", detail: "Consultation · 3:30 PM" },
               ].map(({ day, date, name, detail }, i, a) => (
                 <div key={name} className={`flex items-center gap-3 py-3 ${i < a.length-1 ? "border-b border-neutral-100" : ""}`}>
-                  <div className="text-center px-3 py-2 bg-[#1a1a1a]/5 rounded-md border border-[#d4af37]/20">
-                    <p className="text-[10px] font-semibold tracking-[0.2em] text-[#d4af37]">{day}</p>
+                  <div className="text-center px-3 py-2 bg-[#1a1a1a]/5 rounded-md border border-gold/20">
+                    <p className="text-[10px] font-semibold tracking-[0.2em] text-gold">{day}</p>
                     <p className="text-xl font-bold text-[#1a1a1a] font-['Adorn_Condensed','Halis','Inter',sans-serif]">{date}</p>
                   </div>
                   <div>
@@ -314,3 +314,5 @@ export function CloserDashboard() {
     </div>
   );
 }
+
+

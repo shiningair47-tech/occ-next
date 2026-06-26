@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserX, Zap, PackagePlus, CircleAlert, CircleCheck, Inbox, ShieldCheck, Hand, RotateCcw, ScanLine, Sparkles, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
+import { parsePaste, ParsedLead } from "@/lib/parsePaste";
 
 interface Replacement {
   id: string; lead_name: string; reason: string; setter: string; pair: string;
@@ -21,28 +22,12 @@ interface PoolEntry {
 
 const SOURCE_OPTIONS = ["Facebook","Instagram","Google Ads","Referral","WhatsApp","TikTok","Walk-in","Other"];
 
-function parsePaste(text: string): { name: string; phone: string }[] {
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-  const seen = new Set<string>();
-  const out: { name: string; phone: string }[] = [];
-  const phoneRe = /(\+?[\d\s\-().]{7,20})/g;
-  for (const line of lines) {
-    const phones = line.match(phoneRe);
-    if (!phones) continue;
-    const phone = phones[0].trim();
-    const norm = phone.replace(/\D/g, "");
-    if (seen.has(norm) || norm.length < 7) continue;
-    seen.add(norm);
-    const name = line.replace(phoneRe, "").replace(/[-—–·,|]+/g, " ").trim() || "Unknown";
-    out.push({ name, phone });
-  }
-  return out;
 }
 
 function Kpi({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4">
-      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-[#d4af37]" /></div>
+      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-gold" /></div>
       <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">{label}</p>
       <p className="text-2xl font-bold text-[#1a1a1a] mt-1.5 tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{value}</p>
     </div>
@@ -71,7 +56,7 @@ function RequestStatusBadge({ status }: { status: string }) {
 
 function FilterPill({ label, active, count, onClick }: { label: string; active: boolean; count: number; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all text-xs font-medium tracking-wide ${active ? "bg-[#1a1a1a] text-[#d4af37] border-[#d4af37]/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
+    <button onClick={onClick} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all text-xs font-medium tracking-wide ${active ? "bg-[#1a1a1a] text-gold border-gold/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
       <span>{label}</span><span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/20">{count}</span>
     </button>
   );
@@ -92,7 +77,7 @@ export default function ReplacementsPage() {
 
   // Pool paste state
   const [poolPaste, setPoolPaste] = useState("");
-  const [poolParsed, setPoolParsed] = useState<{ name: string; phone: string }[]>([]);
+  const [poolParsed, setPoolParsed] = useState<ParsedLead[]>(([]);
   const [poolSource, setPoolSource] = useState(SOURCE_OPTIONS[0]);
   const [poolError, setPoolError] = useState("");
   const [poolConfirm, setPoolConfirm] = useState("");
@@ -182,7 +167,7 @@ export default function ReplacementsPage() {
       {/* === DATA REQUESTS SECTION === */}
       <div className="bg-white border border-neutral-200 rounded-lg p-5 mb-8">
         <div className="flex items-center gap-3 mb-5">
-          <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><PackagePlus className="h-4 w-4 text-[#d4af37]" /></div>
+          <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><PackagePlus className="h-4 w-4 text-gold" /></div>
           <div>
             <h2 className="text-xl font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Setter Data Requests</h2>
             <p className="text-xs text-neutral-500 mt-0.5">Review and fulfill replacement-data requests submitted by setters.</p>
@@ -204,9 +189,9 @@ export default function ReplacementsPage() {
           <div className="flex flex-col gap-3">
             {filteredReqs.map(r => (
               <div key={r.id} className="flex flex-col">
-                <div className="flex items-start justify-between gap-3 bg-white border border-neutral-200 rounded-lg p-4 hover:border-[#d4af37]/40 transition-colors">
+                <div className="flex items-start justify-between gap-3 bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/40 transition-colors">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center shrink-0"><PackagePlus className="h-4 w-4 text-[#d4af37]" /></div>
+                    <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center shrink-0"><PackagePlus className="h-4 w-4 text-gold" /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-[#1a1a1a]">{r.requested_count} lead(s)</p>
@@ -216,7 +201,7 @@ export default function ReplacementsPage() {
                       <div className="flex items-center gap-1.5 mt-1 flex-wrap text-[10px]">
                         <span className="text-neutral-400">Setter:</span><span className="text-[#1a1a1a] font-semibold">{r.setter}</span>
                         <span className="text-neutral-300">·</span>
-                        <span className="text-neutral-400">Team:</span><span className="text-[#8a6d1a] font-semibold">{r.team}</span>
+                        <span className="text-neutral-400">Team:</span><span className="text-gold-dark font-semibold">{r.team}</span>
                         <span className="text-neutral-300">·</span>
                         <span className="text-neutral-400">Day:</span><span className="font-mono text-neutral-700">{r.requested_day}</span>
                         <span className="text-neutral-300">·</span>
@@ -243,24 +228,24 @@ export default function ReplacementsPage() {
                         Close Form
                       </button>
                     ) : (
-                      <button onClick={() => { setActiveReqId(r.id); setFulfillCount(String(r.requested_count)); }} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[11px] font-semibold transition-colors shrink-0">
+                      <button onClick={() => { setActiveReqId(r.id); setFulfillCount(String(r.requested_count)); }} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[11px] font-semibold transition-colors shrink-0">
                         Fulfill
                       </button>
                     )
                   )}
                 </div>
                 {activeReqId === r.id && r.status === "pending" && (
-                  <div className="mt-2 p-4 bg-[#faf8f3] border border-[#d4af37]/30 rounded-md">
+                  <div className="mt-2 p-4 bg-[#faf8f3] border border-gold/30 rounded-md">
                     <div className="flex items-end gap-3 flex-wrap mb-3">
                       <div className="flex-1 min-w-[180px]">
                         <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">ADMIN NOTE (OPTIONAL)</p>
                         <input type="text" value={fulfillNote} onChange={e => setFulfillNote(e.target.value)} placeholder="e.g. Fresh batch from Meta campaign"
-                          className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none" />
+                          className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-gold focus:outline-none" />
                       </div>
                       <div className="w-32">
                         <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">LEADS DELIVERED</p>
                         <input type="number" min="0" value={fulfillCount} onChange={e => setFulfillCount(e.target.value)}
-                          className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none" />
+                          className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-white text-xs text-[#1a1a1a] focus:border-gold focus:outline-none" />
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -288,9 +273,9 @@ export default function ReplacementsPage() {
       <div className="mb-8">
         <div className="bg-white border border-neutral-200 rounded-lg p-5 mb-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><PackagePlus className="h-4 w-4 text-[#d4af37]" /></div>
+            <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><PackagePlus className="h-4 w-4 text-gold" /></div>
             <div>
-              <p className="text-[10px] font-semibold tracking-[0.3em] text-[#8a6d1a]">REPLACEMENT POOL</p>
+              <p className="text-[10px] font-semibold tracking-[0.3em] text-gold-dark">REPLACEMENT POOL</p>
               <h3 className="text-base font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif] mt-0.5">Add leads to pool</h3>
               <p className="text-xs text-neutral-500 mt-0.5">Paste replacement leads below — one per line with a phone number. They&apos;ll be used to auto-fulfill replacement requests.</p>
             </div>
@@ -299,27 +284,27 @@ export default function ReplacementsPage() {
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">PASTE LEADS</p>
               <button onClick={() => { setPoolPaste("Replacement Lead — +91 98000 11111\nSpare Contact - +91 99001 22233"); setPoolParsed([]); setPoolError(""); setPoolConfirm(""); }}
-                className="flex items-center gap-1.5 text-[10px] tracking-[0.2em] font-semibold text-[#8a6d1a] hover:text-[#1a1a1a] transition-colors">
+                className="flex items-center gap-1.5 text-[10px] tracking-[0.2em] font-semibold text-gold-dark hover:text-[#1a1a1a] transition-colors">
                 <Sparkles className="h-3 w-3" /><span>Load sample</span>
               </button>
             </div>
             <textarea value={poolPaste} onChange={e => { setPoolPaste(e.target.value); setPoolParsed([]); setPoolError(""); setPoolConfirm(""); }}
               placeholder="Replacement Lead — +91 98000 11111&#10;Spare Contact - +91 99001 22233"
-              className="w-full h-32 px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono leading-relaxed focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 resize-none" />
+              className="w-full h-32 px-4 py-3 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] font-mono leading-relaxed focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none" />
           </div>
           <div className="flex items-end gap-3 flex-wrap mb-3">
             <div className="flex-1 min-w-[180px]">
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">SOURCE TAG</p>
               <div className="relative">
                 <select value={poolSource} onChange={e => setPoolSource(e.target.value)}
-                  className="appearance-none w-full px-3 py-2.5 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none">
+                  className="appearance-none w-full px-3 py-2.5 pr-8 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] focus:border-gold focus:outline-none">
                   {SOURCE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={handlePoolParse} className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#1a1a1a] text-[#d4af37] text-sm font-semibold border border-[#d4af37]/40 hover:bg-[#2a2a2a] transition-colors">
+              <button onClick={handlePoolParse} className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#1a1a1a] text-gold text-sm font-semibold border border-gold/40 hover:bg-[#2a2a2a] transition-colors">
                 <ScanLine className="h-4 w-4" /><span>Parse</span>
               </button>
               <button onClick={() => { setPoolPaste(""); setPoolParsed([]); setPoolError(""); setPoolConfirm(""); }}
@@ -387,10 +372,10 @@ export default function ReplacementsPage() {
           {filteredPool.length > 0 ? (
             <div className="flex flex-col gap-3">
               {filteredPool.map(p => (
-                <div key={p.id} className="flex items-center justify-between gap-3 bg-white border border-neutral-200 rounded-lg px-4 py-3 hover:border-[#d4af37]/30 transition-colors">
+                <div key={p.id} className="flex items-center justify-between gap-3 bg-white border border-neutral-200 rounded-lg px-4 py-3 hover:border-gold/30 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-[#d4af37]">{p.name[0]}</span>
+                      <span className="text-xs font-bold text-gold">{p.name[0]}</span>
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -442,7 +427,7 @@ export default function ReplacementsPage() {
                 {bySetterList.map(g => (
                   <div key={g.setter} className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-md bg-[#1a1a1a] flex items-center justify-center"><UserX className="h-3.5 w-3.5 text-[#d4af37]" /></div>
+                      <div className="h-8 w-8 rounded-md bg-[#1a1a1a] flex items-center justify-center"><UserX className="h-3.5 w-3.5 text-gold" /></div>
                       <div>
                         <p className="text-sm font-semibold text-[#1a1a1a]">{g.setter}</p>
                         <p className="text-[11px] text-neutral-500 mt-0.5">{g.total} total requests</p>
@@ -460,10 +445,10 @@ export default function ReplacementsPage() {
           <h3 className="text-xs font-semibold tracking-[0.25em] text-neutral-400 uppercase mb-3">Audit Trail</h3>
           <div className="flex flex-col gap-3">
             {filteredReps.map(r => (
-              <div key={r.id} className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-[#d4af37]/40 transition-colors">
+              <div key={r.id} className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/40 transition-colors">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center shrink-0"><UserX className="h-4 w-4 text-[#d4af37]" /></div>
+                    <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center shrink-0"><UserX className="h-4 w-4 text-gold" /></div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-[#1a1a1a]">{r.lead_name}</p>
@@ -471,7 +456,7 @@ export default function ReplacementsPage() {
                         <StatusBadge status={r.status} />
                         {r.status === "fulfilled" && (
                           r.auto_fulfilled
-                            ? <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-[#d4af37]/10 text-[#8a6d1a] border-[#d4af37]/30 w-fit"><Zap className="h-3 w-3" /><span>Auto</span></span>
+                            ? <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-gold/10 text-gold-dark border-gold/30 w-fit"><Zap className="h-3 w-3" /><span>Auto</span></span>
                             : <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border bg-blue-50 text-blue-700 border-blue-200 w-fit"><Hand className="h-3 w-3" /><span>Manual</span></span>
                         )}
                       </div>
@@ -528,3 +513,7 @@ export default function ReplacementsPage() {
     </div>
   );
 }
+
+
+
+

@@ -2,16 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { GitBranch, Flame, PlaneLanding, X, Inbox, Phone, Copy, CircleCheck, RotateCcw, Calendar, Snowflake, Users, Download, Boxes } from "lucide-react";
 import toast from "react-hot-toast";
-
-interface Lead {
-  id: string; name: string; phone: string; notes: string; source: string;
-  team: string; setter: string; closer: string; setter_status: string;
-  closer_status: string; whatsapp_added: boolean;
-  t1: boolean; t2: boolean; t3: boolean; t4: boolean; t5: boolean; t6: boolean;
-  appointment_date: string; created_at: string; assigned_date: string;
-  handoff_status: string; handoff_at: string; handoff_note: string;
-  handoff_by: string; accepted_at: string; called_dates: string[];
-}
+import { Lead } from "@/types";
 
 function CloserStatusBadge({ status }: { status: string }) {
   const cfg: Record<string, { cls: string; label: string }> = {
@@ -28,7 +19,7 @@ function CloserStatusBadge({ status }: { status: string }) {
 function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4">
-      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-[#d4af37]" /></div>
+      <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center mb-4"><Icon className="h-4 w-4 text-gold" /></div>
       <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400">{label}</p>
       <p className="text-2xl font-bold text-[#1a1a1a] mt-1.5 tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{value}</p>
     </div>
@@ -78,32 +69,32 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
     <div>
       {/* Intake section */}
       {intakeLeads.length > 0 && (
-        <div className="bg-[#faf8f3] border border-[#d4af37]/30 rounded-lg p-5 mb-6">
+        <div className="bg-[#faf8f3] border border-gold/30 rounded-lg p-5 mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><Inbox className="h-4 w-4 text-[#d4af37]" /></div>
+            <div className="h-9 w-9 rounded-md bg-[#1a1a1a] flex items-center justify-center"><Inbox className="h-4 w-4 text-gold" /></div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-[10px] font-semibold tracking-[0.3em] text-[#8a6d1a]">INCOMING HANDOFFS</p>
-                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#d4af37] text-[#1a1a1a] text-[10px] font-bold">{intakeLeads.length}</span>
+                <p className="text-[10px] font-semibold tracking-[0.3em] text-gold-dark">INCOMING HANDOFFS</p>
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-gold text-[#1a1a1a] text-[10px] font-bold">{intakeLeads.length}</span>
               </div>
               <p className="text-xs text-neutral-500 mt-0.5">New leads handed off by your setter — accept to add them to your active pipeline.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {intakeLeads.map(lead => (
-              <div key={lead.id} className="bg-white border-2 border-[#d4af37]/40 rounded-lg p-4 hover:border-[#d4af37] transition-colors shadow-sm">
+              <div key={lead.id} className="bg-white border-2 border-gold/40 rounded-lg p-4 hover:border-gold transition-colors shadow-sm">
                 <div className="mb-3">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-[#d4af37]">{lead.name[0]}</span>
+                      <span className="text-sm font-bold text-gold">{lead.name[0]}</span>
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase border bg-[#d4af37]/10 text-[#8a6d1a] border-[#d4af37]/40 w-fit">NEW HANDOFF</span>
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase border bg-gold/10 text-gold-dark border-gold/40 w-fit">NEW HANDOFF</span>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-neutral-500 hover:text-[#d4af37] transition-colors text-xs">{lead.phone}</a>
+                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-neutral-500 hover:text-gold transition-colors text-xs">{lead.phone}</a>
                       </div>
                     </div>
                   </div>
@@ -140,14 +131,14 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
       <div className="bg-[#faf8f3] border border-neutral-200 rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <Boxes className="h-3.5 w-3.5 text-[#d4af37]" />
+            <Boxes className="h-3.5 w-3.5 text-gold" />
             <p className="text-xs font-semibold tracking-wide text-[#1a1a1a]">Today&apos;s Assigned Batches</p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
+            <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
               <Download className="h-3 w-3" /><span>Day CSV</span>
             </button>
-            <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-[#d4af37] text-[10px] font-semibold transition-colors">
+            <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white text-neutral-700 border border-neutral-200 hover:border-gold text-[10px] font-semibold transition-colors">
               <Download className="h-3 w-3" /><span>All My Leads</span>
             </button>
           </div>
@@ -170,16 +161,16 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
           <p className="text-xs text-neutral-500 mt-0.5">Track touchpoints, appointments, and outcomes for qualified leads</p>
           {userTeam && (
             <div className="flex items-center gap-1.5 mt-2">
-              <Users className="h-3.5 w-3.5 text-[#d4af37]" />
+              <Users className="h-3.5 w-3.5 text-gold" />
               <span className="text-[11px] font-semibold tracking-wide text-[#1a1a1a]">{userTeam}</span>
-              {pairedSetter && <><span className="text-[11px] text-neutral-500"> · Paired with </span><span className="text-[11px] font-semibold text-[#8a6d1a]">{pairedSetter}</span></>}
+              {pairedSetter && <><span className="text-[11px] text-neutral-500"> · Paired with </span><span className="text-[11px] font-semibold text-gold-dark">{pairedSetter}</span></>}
             </div>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map(f => (
             <button key={f.value} onClick={() => setFilter(f.value)}
-              className={`px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${filter === f.value ? "bg-[#1a1a1a] text-[#d4af37] border-[#d4af37]/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
+              className={`px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${filter === f.value ? "bg-[#1a1a1a] text-gold border-gold/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
               {f.label}
             </button>
           ))}
@@ -190,20 +181,20 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
       {pipelineLeads.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {pipelineLeads.map(lead => (
-            <div key={lead.id} className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-[#d4af37]/40 transition-colors">
+            <div key={lead.id} className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/40 transition-colors">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-[#d4af37]">{lead.name[0]}</span>
+                    <span className="text-sm font-bold text-gold">{lead.name[0]}</span>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-neutral-500 hover:text-[#d4af37] transition-colors text-xs">
+                      <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-neutral-500 hover:text-gold transition-colors text-xs">
                         <Phone className="h-3 w-3" />{lead.phone}
                       </a>
                       <button onClick={() => { navigator.clipboard.writeText(lead.phone); toast.success("Copied!"); }}
-                        className="text-neutral-400 hover:text-[#d4af37] transition-colors"><Copy className="h-3 w-3" /></button>
+                        className="text-neutral-400 hover:text-gold transition-colors"><Copy className="h-3 w-3" /></button>
                     </div>
                   </div>
                 </div>
@@ -213,7 +204,7 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
               {/* Assigned date */}
               {lead.assigned_date && (
                 <div className="flex items-center gap-1.5 mb-3 px-2 py-1 rounded-md bg-[#faf8f3] border border-neutral-200 w-fit">
-                  <Calendar className="h-3 w-3 text-[#d4af37] shrink-0" />
+                  <Calendar className="h-3 w-3 text-gold shrink-0" />
                   <span className="text-[10px] text-neutral-500">Assigned </span>
                   <span className="text-[10px] font-mono font-semibold text-[#1a1a1a]">{lead.assigned_date}</span>
                 </div>
@@ -234,7 +225,7 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                 <div className="flex gap-1.5">
                   {([["1","t1",lead.t1],["2","t2",lead.t2],["3","t3",lead.t3],["4","t4",lead.t4],["5","t5",lead.t5],["6","t6",lead.t6]] as [string,string,boolean][]).map(([num, key, active]) => (
                     <button key={key} onClick={() => toggleTouchpoint(lead.id, num, active)}
-                      className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${active ? "bg-[#1a1a1a] text-[#d4af37] border border-[#d4af37]/40" : "bg-neutral-50 text-neutral-400 border border-neutral-200 hover:border-[#1a1a1a]"}`}>
+                      className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${active ? "bg-[#1a1a1a] text-gold border border-gold/40" : "bg-neutral-50 text-neutral-400 border border-neutral-200 hover:border-[#1a1a1a]"}`}>
                       <span className="text-[10px] font-bold">T{num}</span>
                     </button>
                   ))}
@@ -246,7 +237,7 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">APPOINTMENT</p>
                 <input type="date" defaultValue={lead.appointment_date}
                   onBlur={e => doAction("set_appointment", lead.id, { date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-[#faf8f3] text-xs text-[#1a1a1a] focus:border-[#d4af37] focus:outline-none focus:ring-2 focus:ring-[#d4af37]/20" />
+                  className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-[#faf8f3] text-xs text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20" />
               </div>
 
               {/* Outcome buttons */}
@@ -278,3 +269,8 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
     </div>
   );
 }
+
+
+
+
+
