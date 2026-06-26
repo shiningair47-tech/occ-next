@@ -22,7 +22,6 @@ interface PoolEntry {
 
 const SOURCE_OPTIONS = ["Facebook","Instagram","Google Ads","Referral","WhatsApp","TikTok","Walk-in","Other"];
 
-}
 
 function Kpi({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
@@ -77,7 +76,7 @@ export default function ReplacementsPage() {
 
   // Pool paste state
   const [poolPaste, setPoolPaste] = useState("");
-  const [poolParsed, setPoolParsed] = useState<ParsedLead[]>(([]);
+  const [poolParsed, setPoolParsed] = useState<ParsedLead[]>([]);
   const [poolSource, setPoolSource] = useState(SOURCE_OPTIONS[0]);
   const [poolError, setPoolError] = useState("");
   const [poolConfirm, setPoolConfirm] = useState("");

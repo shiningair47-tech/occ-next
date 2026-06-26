@@ -4,7 +4,7 @@ import {
   Trophy, ListChecks, GitBranch, LogOut, Eye, X, Shield, PhoneCall,
   ChevronDown,
 } from "lucide-react";
-import { ViewKey } from "@/lib/roleViews";
+import { ViewKey } from "@/types";
 import { MemberPreviewOption } from "@/types";
 
 interface IdentityInfo {

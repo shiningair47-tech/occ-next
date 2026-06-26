@@ -5,7 +5,7 @@ import {
   Trash2, UserX, CircleAlert, CircleCheck, ChevronDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { ApiUser } from "@/types";
+import { User, ApiUser } from "@/types";
 
 interface PairAssignment {
   name: string; setter: string; closer: string; status: string; members: number;
