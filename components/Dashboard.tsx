@@ -242,17 +242,29 @@ export function SetterDashboard() {
 }
 
 // ---- Closer Dashboard ----
-function PipelineCard({ name, phone, status, color, touchpoints }: {
+function PipelineCard({ name, phone, status, color, touchpoints, appointmentDate, followups }: {
   name: string; phone: string; status: string; color: string; touchpoints: number;
+  appointmentDate?: string; followups?: any[];
 }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const hasOverdue = followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today);
+  const overdueCount = followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < today).length ?? 0;
+  
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/50 transition-colors">
       <div className="flex items-center gap-3 mb-4">
         <div className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
           <span className="text-sm font-bold text-gold">{name[0]}</span>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-[#1a1a1a]">{name}</p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-[#1a1a1a]">{name}</p>
+            {hasOverdue && (
+              <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-red-100 text-red-700 border border-red-300 text-[9px] font-bold">
+                {overdueCount} overdue
+              </span>
+            )}
+          </div>
           <p className="text-xs text-neutral-500 mt-0.5">{phone}</p>
         </div>
         <StatusBadge label={status} color={color} />
@@ -271,6 +283,39 @@ function PipelineCard({ name, phone, status, color, touchpoints }: {
           ))}
         </div>
       </div>
+      
+      {/* Followup section */}
+      {followups && followups.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-neutral-100">
+          <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">FOLLOWUPS</p>
+          <div className="flex flex-col gap-1">
+            {followups.map((f: any) => (
+              <div key={f.id} className={`flex items-center justify-between px-2 py-1 rounded-md text-[11px] ${
+                f.status === "done" ? "bg-emerald-50/50 text-neutral-400 line-through" : "bg-[#faf8f3] text-[#1a1a1a]"
+              }`}>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-semibold">{f.scheduled_date.slice(5)}</span>
+                  <span className="text-[10px]">{f.scheduled_time}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                    f.type === "arrival" ? "bg-emerald-100 text-emerald-700" :
+                    f.type.startsWith("confirmation") ? "bg-gold/10 text-gold-dark" :
+                    "bg-neutral-100 text-neutral-600"
+                  }`}>{f.type.replace("_", " ")}</span>
+                </div>
+                <div className="flex flex-col items-end gap-0.5">
+                  {f.status === "done" && <span className="text-emerald-500 text-xs">✓</span>}
+                  {f.status === "done" && f.completed_by && (
+                    <span className="text-[8px] text-neutral-400 whitespace-nowrap">{f.completed_by}</span>
+                  )}
+                  {f.status === "done" && f.completed_at && (
+                    <span className="text-[8px] text-neutral-400 font-mono">{f.completed_at.slice(5, 16).replace("T", " ")}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -335,7 +380,7 @@ export function CloserDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {pipelineLeads.length > 0 ? (
               pipelineLeads.slice(0, 6).map(lead => (
-                <PipelineCard key={lead.id} name={lead.name} phone={lead.phone} status={getStatusLabel(lead.closer_status)} color={getStatusColor(lead.closer_status)} touchpoints={countTouchpoints(lead)} />
+                <PipelineCard key={lead.id} name={lead.name} phone={lead.phone} status={getStatusLabel(lead.closer_status)} color={getStatusColor(lead.closer_status)} touchpoints={countTouchpoints(lead)} appointmentDate={lead.appointment_date} followups={lead.followups} />
               ))
             ) : (
               <div className="col-span-full bg-white border border-dashed border-neutral-200 rounded-lg p-8 text-center">
