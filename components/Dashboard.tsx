@@ -3,6 +3,7 @@ import {
   Activity, Target, RefreshCw, TrendingUp, TrendingDown,
   PhoneCall, CircleCheck, ListChecks, GitBranch, Flame,
   CircleAlert,
+  Calendar,
 } from "lucide-react";
 import { ReactNode, useState, useEffect, useCallback } from "react";
 import { Lead } from "@/types";
@@ -275,31 +276,82 @@ function PipelineCard({ name, phone, status, color, touchpoints }: {
 }
 
 export function CloserDashboard() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/leads?scope=closer_pipeline");
+    if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const pipelineLeads = leads.filter(l => l.handoff_status === "accepted");
+
+  const activeCount = pipelineLeads.length;
+  const hotCount = pipelineLeads.filter(l => l.closer_status === "hot").length;
+  const arrivedCount = pipelineLeads.filter(l => l.closer_status === "arrived").length;
+  const lostCount = pipelineLeads.filter(l => l.closer_status === "lost").length;
+  const newCount = pipelineLeads.filter(l => l.closer_status === "new" || l.closer_status === "").length;
+  const coldCount = pipelineLeads.filter(l => l.closer_status === "cold").length;
+
+  function getStatusColor(status: string): string {
+    if (status === "hot") return "red";
+    if (status === "cold") return "gray";
+    if (status === "arrived") return "green";
+    if (status === "lost") return "gray";
+    return "blue";
+  }
+
+  function getStatusLabel(status: string): string {
+    if (status === "hot") return "Hot";
+    if (status === "cold") return "Cold";
+    if (status === "arrived") return "Arrived";
+    if (status === "lost") return "Lost";
+    return "New";
+  }
+
+  function countTouchpoints(lead: Lead): number {
+    let c = 0;
+    if (lead.t1) c++;
+    if (lead.t2) c++;
+    if (lead.t3) c++;
+    if (lead.t4) c++;
+    if (lead.t5) c++;
+    if (lead.t6) c++;
+    return c;
+  }
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-        <KpiCard label="Active Pipeline" value="38" change="+5" icon={GitBranch} positive />
-        <KpiCard label="Hot Leads" value="12" change="+4" icon={Flame} positive />
-        <KpiCard label="Arrived This Week" value="8" change="+2" icon={TrendingUp} positive />
-        <KpiCard label="Lost This Week" value="3" change="-1" icon={TrendingDown} positive />
+        <KpiCard label="Active Pipeline" value={String(activeCount)} change="" icon={GitBranch} positive />
+        <KpiCard label="Hot Leads" value={String(hotCount)} change="" icon={Flame} positive />
+        <KpiCard label="Arrived This Week" value={String(arrivedCount)} change="" icon={TrendingUp} positive />
+        <KpiCard label="Lost This Week" value={String(lostCount)} change="" icon={TrendingDown} positive />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <SectionTitle title="Active Pipeline" subtitle="Qualified leads requiring follow-up" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <PipelineCard name="Rahul Verma" phone="+91 98765 11223" status="Hot" color="red" touchpoints={4} />
-            <PipelineCard name="Sneha Kulkarni" phone="+91 91122 33445" status="Hot" color="red" touchpoints={5} />
-            <PipelineCard name="Arjun Bhatia" phone="+91 99887 66554" status="New" color="blue" touchpoints={1} />
-            <PipelineCard name="Divya Menon" phone="+91 90011 22334" status="Cold" color="gray" touchpoints={3} />
+            {pipelineLeads.length > 0 ? (
+              pipelineLeads.slice(0, 6).map(lead => (
+                <PipelineCard key={lead.id} name={lead.name} phone={lead.phone} status={getStatusLabel(lead.closer_status)} color={getStatusColor(lead.closer_status)} touchpoints={countTouchpoints(lead)} />
+              ))
+            ) : (
+              <div className="col-span-full bg-white border border-dashed border-neutral-200 rounded-lg p-8 text-center">
+                <GitBranch className="h-8 w-8 text-neutral-300 mx-auto mb-2" />
+                <p className="text-xs text-neutral-500">No active pipeline leads yet</p>
+              </div>
+            )}
           </div>
         </div>
         <div>
           <SectionTitle title="Pipeline Health" subtitle="Status breakdown" />
           <div className="bg-white border border-neutral-200 rounded-lg p-5">
             {[
-              { label: "New", count: "9", dot: "bg-blue-500" },
-              { label: "Hot", count: "12", dot: "bg-red-500" },
-              { label: "Cold", count: "17", dot: "bg-neutral-400" },
+              { label: "New", count: String(newCount), dot: "bg-blue-500" },
+              { label: "Hot", count: String(hotCount), dot: "bg-red-500" },
+              { label: "Cold", count: String(coldCount), dot: "bg-neutral-400" },
             ].map(({ label, count, dot }, i, a) => (
               <div key={label} className={`flex items-center justify-between py-2.5 ${i < a.length-1 ? "border-b border-neutral-100" : ""}`}>
                 <div className="flex items-center gap-2">
@@ -313,21 +365,29 @@ export function CloserDashboard() {
           <div className="mt-6">
             <SectionTitle title="Upcoming Appointments" subtitle="Next 7 days" />
             <div className="bg-white border border-neutral-200 rounded-lg p-5">
-              {[
-                { day: "MON", date: "18", name: "Rahul Verma", detail: "Office visit · 11:00 AM" },
-                { day: "WED", date: "20", name: "Sneha Kulkarni", detail: "Consultation · 3:30 PM" },
-              ].map(({ day, date, name, detail }, i, a) => (
-                <div key={name} className={`flex items-center gap-3 py-3 ${i < a.length-1 ? "border-b border-neutral-100" : ""}`}>
-                  <div className="text-center px-3 py-2 bg-[#1a1a1a]/5 rounded-md border border-gold/20">
-                    <p className="text-[10px] font-semibold tracking-[0.2em] text-gold">{day}</p>
-                    <p className="text-xl font-bold text-[#1a1a1a] font-['Adorn_Condensed','Halis','Inter',sans-serif]">{date}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#1a1a1a]">{name}</p>
-                    <p className="text-xs text-neutral-500">{detail}</p>
-                  </div>
+              {pipelineLeads.filter(l => l.appointment_date).slice(0, 5).length > 0 ? (
+                pipelineLeads.filter(l => l.appointment_date).slice(0, 5).map((lead, i, a) => {
+                  const d = new Date(lead.appointment_date!);
+                  const dayNames = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+                  return (
+                    <div key={lead.id} className={`flex items-center gap-3 py-3 ${i < a.length-1 ? "border-b border-neutral-100" : ""}`}>
+                      <div className="text-center px-3 py-2 bg-[#1a1a1a]/5 rounded-md border border-gold/20">
+                        <p className="text-[10px] font-semibold tracking-[0.2em] text-gold">{dayNames[d.getDay()]}</p>
+                        <p className="text-xl font-bold text-[#1a1a1a] font-['Adorn_Condensed','Halis','Inter',sans-serif]">{String(d.getDate()).padStart(2, "0")}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
+                        <p className="text-xs text-neutral-500">Appointment &bull; {lead.appointment_date}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-6 text-center">
+                  <Calendar className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
+                  <p className="text-xs text-neutral-500">No appointments scheduled</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -335,5 +395,6 @@ export function CloserDashboard() {
     </div>
   );
 }
+
 
 
