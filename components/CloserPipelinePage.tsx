@@ -71,7 +71,8 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
   const pairedSetter = leads.length > 0 ? leads[0].setter : "";
 
   const todayStr = () => new Date().toISOString().slice(0, 10);
-  const todayBatches = batches.filter(b => b.assigned_at?.startsWith(todayStr()));
+  const [selectedDate, setSelectedDate] = useState(todayStr());
+  const filteredBatches = batches.filter(b => b.assigned_at?.startsWith(selectedDate));
 
   const FILTERS = [
     { label: "All", value: "all" }, { label: "New", value: "new" }, { label: "Hot", value: "hot" },
@@ -148,6 +149,21 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
             <p className="text-xs font-semibold tracking-wide text-[#1a1a1a]">Today&apos;s Assigned Batches</p>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-white border border-neutral-200 rounded-md overflow-hidden">
+              <button onClick={() => {
+                const d = new Date(selectedDate);
+                d.setDate(d.getDate() - 1);
+                setSelectedDate(d.toISOString().slice(0, 10));
+              }} className="px-2 py-1.5 hover:bg-neutral-100 text-neutral-600 hover:text-[#1a1a1a] transition-colors text-xs font-medium">←</button>
+              <input type="date" value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                className="w-28 px-2 py-1.5 text-xs text-center border-x border-neutral-200 bg-white text-[#1a1a1a] focus:outline-none" />
+              <button onClick={() => {
+                const d = new Date(selectedDate);
+                d.setDate(d.getDate() + 1);
+                setSelectedDate(d.toISOString().slice(0, 10));
+              }} className="px-2 py-1.5 hover:bg-neutral-100 text-neutral-600 hover:text-[#1a1a1a] transition-colors text-xs font-medium">→</button>
+            </div>
             <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
               <Download className="h-3 w-3" /><span>Day CSV</span>
             </button>
@@ -156,9 +172,9 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
             </button>
           </div>
         </div>
-        {todayBatches.length > 0 ? (
+        {filteredBatches.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {todayBatches.map(b => (
+            {filteredBatches.map(b => (
               <div key={b.id} className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-4 py-3 hover:border-gold/40 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-md bg-[#1a1a1a] flex items-center justify-center">
