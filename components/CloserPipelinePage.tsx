@@ -28,11 +28,12 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 
 export default function CloserPipelinePage({ userName, userTeam }: { userName: string; userTeam: string }) {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/leads?scope=closer_pipeline");
-    if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); }
+    if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); setBatches(d.batches ?? []); }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -59,6 +60,9 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
   const arrived = leads.filter(l => l.closer_status === "arrived").length;
   const lost = leads.filter(l => l.closer_status === "lost").length;
   const pairedSetter = leads.length > 0 ? leads[0].setter : "";
+
+  const todayStr = () => new Date().toISOString().slice(0, 10);
+  const todayBatches = batches.filter(b => b.assigned_at?.startsWith(todayStr()));
 
   const FILTERS = [
     { label: "All", value: "all" }, { label: "New", value: "new" }, { label: "Hot", value: "hot" },
@@ -143,7 +147,26 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
             </button>
           </div>
         </div>
-        <p className="text-[11px] text-neutral-500 italic">No batches assigned today. Showing all active pipeline below.</p>
+        {todayBatches.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {todayBatches.map(b => (
+              <div key={b.id} className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-4 py-3 hover:border-gold/40 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-md bg-[#1a1a1a] flex items-center justify-center">
+                    <Boxes className="h-3.5 w-3.5 text-gold" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#1a1a1a]">{b.label || b.source + " Batch"}</p>
+                    <p className="text-[10px] text-neutral-500">{b.source}  •  {b.lead_count} leads  •  {b.assigned_at?.slice(0, 10)}</p>
+                  </div>
+                </div>
+                <span className="inline-flex px-2.5 py-1 rounded-full bg-[#faf8f3] text-gold-dark border border-gold/20 text-[10px] font-semibold">{b.lead_count}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-neutral-500 italic">No batches assigned today. Showing all active pipeline below.</p>
+        )}
       </div>
 
       {/* KPIs */}

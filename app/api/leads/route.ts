@@ -44,9 +44,15 @@ export async function GET(req: NextRequest) {
   const { data: leads, error } = await query.order("assigned_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Also return batches if admin
+  // Also return batches (filtered by role)
   let batches = null;
-  if (isAdmin) {
+  if (scope === "setter_queue") {
+    const { data: b } = await supabaseAdmin.from("lead_batches").select("*").eq("setter", user.name).order("assigned_at", { ascending: false }).limit(20);
+    batches = b;
+  } else if (scope === "closer_pipeline") {
+    const { data: b } = await supabaseAdmin.from("lead_batches").select("*").eq("closer", user.name).order("assigned_at", { ascending: false }).limit(20);
+    batches = b;
+  } else if (isAdmin) {
     const { data: b } = await supabaseAdmin.from("lead_batches").select("*").order("assigned_at", { ascending: false }).limit(20);
     batches = b;
   }
