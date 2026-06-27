@@ -4,7 +4,8 @@ import {
   PhoneCall, CircleCheck, ListChecks, GitBranch, Flame,
   CircleAlert,
 } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect, useCallback } from "react";
+import { Lead } from "@/types";
 
 // ---- Helpers ----
 function KpiCard({ label, value, change, icon: Icon, positive = true }: {
@@ -173,40 +174,60 @@ function QueueItem({ name, phone, source, time }: { name: string; phone: string;
 }
 
 export function SetterDashboard() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/leads?scope=setter_queue");
+    if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const totalLeads = leads.length;
+  const calledToday = leads.filter(l => l.called_dates?.includes(todayStr)).length;
+  const qualifiedToday = leads.filter(l => l.setter_status === "qualified").length;
+  const qualRate = totalLeads > 0 ? Math.round((qualifiedToday / totalLeads) * 100) + "%" : "0%";
+  const pendingLeads = leads.filter(l => l.setter_status === "pending" || !l.setter_status).length;
+  const dailyTarget = 15;
+  const dailyPct = Math.min(Math.round((qualifiedToday / dailyTarget) * 100), 100);
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-        <KpiCard label="Called Today" value="42" change="+8" icon={PhoneCall} positive />
-        <KpiCard label="Qualified Today" value="11" change="+3" icon={CircleCheck} positive />
-        <KpiCard label="Qualification Rate" value="26.2%" change="+2.4%" icon={Target} positive />
-        <KpiCard label="Queue Remaining" value="23" change="-19" icon={ListChecks} positive />
+        <KpiCard label="Called Today" value={String(calledToday)} change="" icon={PhoneCall} positive />
+        <KpiCard label="Qualified Today" value={String(qualifiedToday)} change="" icon={CircleCheck} positive />
+        <KpiCard label="Qualification Rate" value={qualRate} change="" icon={Target} positive />
+        <KpiCard label="Queue Remaining" value={String(pendingLeads)} change="" icon={ListChecks} positive />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <SectionTitle title="Today's Queue" subtitle="Leads assigned to you, ready to call" />
           <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
-            <QueueItem name="Vikram Singh" phone="+91 98765 43210" source="Instagram" time="2h ago" />
-            <QueueItem name="Anjali Reddy" phone="+91 91234 56789" source="Facebook" time="3h ago" />
-            <QueueItem name="Karthik Iyer" phone="+91 99887 76655" source="Google Ads" time="4h ago" />
-            <QueueItem name="Meera Joshi" phone="+91 90011 22334" source="Referral" time="5h ago" />
-            <QueueItem name="Suresh Patel" phone="+91 88990 11223" source="Instagram" time="6h ago" />
+            {leads.length > 0 ? leads.slice(0, 10).map(l => (
+              <QueueItem key={l.id} name={l.name} phone={l.phone} source={l.source || "-"} time={l.assigned_at ? new Date(l.assigned_at).toLocaleString() : "-"} />
+            )) : (
+              <div className="p-8 text-center">
+                <p className="text-sm text-neutral-500">No leads assigned yet</p>
+              </div>
+            )}
           </div>
         </div>
         <div>
           <SectionTitle title="Daily Target" subtitle="Your performance today" />
           <div className="bg-white border border-neutral-200 rounded-lg p-6">
             <div className="text-center mb-5">
-              <p className="text-4xl font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">11 / 15</p>
+              <p className="text-4xl font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">{qualifiedToday} / {dailyTarget}</p>
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mt-1">QUALIFIED LEADS</p>
             </div>
             <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gold rounded-full" style={{ width: "73%" }} />
+              <div className="h-full bg-gold rounded-full transition-all" style={{ width: dailyPct + "%" }} />
             </div>
-            <p className="text-xs text-neutral-500 mt-3 text-center">73% of daily target reached</p>
+            <p className="text-xs text-neutral-500 mt-3 text-center">{dailyPct}% of daily target reached</p>
           </div>
           <div className="bg-white border border-neutral-200 rounded-lg p-5 mt-4">
             <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-3">THIS WEEK</p>
-            {[["Calls Made","218"],["Qualified","54"],["Replacements","12"]].map(([k,v],i,a) => (
+            {[["Total Leads", String(totalLeads)],["Called", String(calledToday)],["Qualified", String(qualifiedToday)]].map(([k,v],i,a) => (
               <div key={k} className={`flex justify-between py-2 ${i < a.length-1 ? "border-b border-neutral-100" : ""}`}>
                 <span className="text-xs text-neutral-600">{k}</span>
                 <span className="text-xs font-bold text-[#1a1a1a]">{v}</span>
