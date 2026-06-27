@@ -136,7 +136,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => shiftDate(-1)} className="h-9 w-9 rounded-md bg-white border border-neutral-200 text-neutral-600 hover:border-[#1a1a1a] hover:text-[#1a1a1a] flex items-center justify-center transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
-            <button onClick={() => setSelectedDate(todayStr())} className="h-9 px-3 rounded-md bg-white border border-neutral-200 text-neutral-700 hover:border-gold hover:text-[#1a1a1a] transition-colors text-xs font-semibold tracking-wide">Today</button>
+            <button onClick={() => setSelectedDate(todayStr())} className="h-9 px-3 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] transition-colors text-xs font-semibold">Today</button>
             <button onClick={() => shiftDate(1)} className="h-9 w-9 rounded-md bg-white border border-neutral-200 text-neutral-600 hover:border-[#1a1a1a] hover:text-[#1a1a1a] flex items-center justify-center transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
           </div>
         </div>
