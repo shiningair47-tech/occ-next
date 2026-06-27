@@ -283,9 +283,24 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
               {/* Appointment */}
               <div className="mb-3">
                 <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">APPOINTMENT</p>
-                <input type="date" defaultValue={lead.appointment_date}
-                  onBlur={e => doAction("set_appointment", lead.id, { date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-md border border-neutral-200 bg-[#faf8f3] text-xs text-[#1a1a1a] focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20" />
+                <div className="flex gap-1.5 overflow-x-auto pb-1 ">
+                  {Array.from({ length: 14 }, (_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + i);
+                    const day = d.getDate();
+                    const s = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
+                    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                    const label = `${day}${s} ${months[d.getMonth()]}`;
+                    const val = d.toISOString().slice(0, 10);
+                    const active = lead.appointment_date === val;
+                    return (
+                      <button key={i} onClick={() => doAction("set_appointment", lead.id, { date: val })}
+                        className={`shrink-0 px-3 py-2 rounded-md border text-[11px] font-semibold transition-colors whitespace-nowrap ${active ? 'bg-[#1a1a1a] text-gold border-gold/40' : 'bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]'}`}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Outcome buttons */}

@@ -53,6 +53,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   const [requestCount, setRequestCount] = useState("10");
   const [requestError, setRequestError] = useState("");
   const [requestSuccess, setRequestSuccess] = useState("");
+  const [fixingApptLeadId, setFixingApptLeadId] = useState<string | null>(null);
   const [dataRequests, setDataRequests] = useState<{ id: string; requested_count: number; reason: string; status: string; requested_day: string; created_at: string; fulfilled_at: string; fulfilled_count: number; admin_note: string; }[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
 
@@ -391,13 +392,49 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
                     { label: "Wrong #", status: "wrong_number", cls: "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100", icon: PhoneOff },
                     { label: "Pending", status: "pending", cls: "bg-neutral-100 text-neutral-700 border border-neutral-200 hover:bg-neutral-200", icon: CircleDashed },
                   ].map(({ label, status, cls, icon: Icon }) => (
-                    <button key={status} onClick={() => doAction("qualify_lead", lead.id, { status })}
+                    <button key={status} onClick={() => {
+                          if (status === "appointment_fixed") {
+                            setFixingApptLeadId(lead.id);
+                          } else {
+                            doAction("qualify_lead", lead.id, { status });
+                          }
+                        }}
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${cls}`}>
                       <Icon className="h-3.5 w-3.5" /><span>{label}</span>
                     </button>
                   ))}
                 </div>
-                {(lead.setter_status === "qualified" || lead.setter_status === "appointment_fixed") && (
+                {fixingApptLeadId === lead.id && (
+                  <div className="mt-3 mb-3">
+                    <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">SELECT APPOINTMENT DATE</p>
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 ">
+                      {Array.from({ length: 14 }, (_, i) => {
+                        const d = new Date();
+                        d.setDate(d.getDate() + i);
+                        const day = d.getDate();
+                        const s = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
+                        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                        const label = `${day}${s} ${months[d.getMonth()]}`;
+                        const val = d.toISOString().slice(0, 10);
+                        return (
+                          <button key={i} onClick={async () => {
+                            await doAction("set_appointment", lead.id, { date: val });
+                            await doAction("qualify_lead", lead.id, { status: "appointment_fixed" });
+                            setFixingApptLeadId(null);
+                          }}
+                            className="shrink-0 px-3 py-2 rounded-md border text-[11px] font-semibold transition-colors whitespace-nowrap bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]">
+                            {label}
+                          </button>
+                        );
+                      })}
+                      <button onClick={() => setFixingApptLeadId(null)}
+                        className="shrink-0 px-3 py-2 rounded-md border text-[11px] font-semibold transition-colors whitespace-nowrap bg-neutral-100 text-neutral-500 border-neutral-200 hover:bg-neutral-200">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                                {(lead.setter_status === "qualified" || lead.setter_status === "appointment_fixed") && (
                   <div className="mt-3 pt-3 border-t border-dashed border-gold/30">
                     <div className="flex items-start gap-2 mb-2">
                       <Send className="h-3.5 w-3.5 text-gold shrink-0" />
