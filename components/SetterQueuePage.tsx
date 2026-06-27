@@ -346,7 +346,14 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
-                        <SetterStatusBadge status={lead.setter_status} />
+                        <div className="flex items-center gap-2">
+                          {(lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < todayStr()).length ?? 0) > 0 && (
+                            <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-red-100 text-red-700 border border-red-300 text-[9px] font-bold">
+                              {lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < todayStr()).length} overdue
+                            </span>
+                          )}
+                          <SetterStatusBadge status={lead.setter_status} />
+                        </div>
                         {isCalled && (
                           <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gold/10 text-gold-dark border border-gold/30 w-fit">
                             <PhoneCall className="h-3 w-3" /><span className="text-[10px] font-semibold tracking-wide">Called {selectedDate}</span>

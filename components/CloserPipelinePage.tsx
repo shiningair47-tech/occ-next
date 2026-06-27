@@ -68,6 +68,8 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
   const hot = leads.filter(l => l.closer_status === "hot").length;
   const arrived = leads.filter(l => l.closer_status === "arrived").length;
   const lost = leads.filter(l => l.closer_status === "lost").length;
+  const today = new Date().toISOString().slice(0, 10);
+  const overdueCount = leads.filter(l => l.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today)).length;
   const pairedSetter = leads.length > 0 ? leads[0].setter : "";
 
   const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -197,9 +199,10 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Kpi label="ACTIVE" value={String(total)} icon={GitBranch} />
         <Kpi label="HOT" value={String(hot)} icon={Flame} />
+        <Kpi label="OVERDUE" value={String(overdueCount)} icon={X} />
         <Kpi label="ARRIVED" value={String(arrived)} icon={PlaneLanding} />
         <Kpi label="LOST" value={String(lost)} icon={X} />
       </div>
@@ -248,7 +251,14 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                     </div>
                   </div>
                 </div>
-                <CloserStatusBadge status={lead.closer_status} />
+                <div className="flex items-center gap-2">
+                  {(lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < today).length ?? 0) > 0 && (
+                    <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-red-100 text-red-700 border border-red-300 text-[9px] font-bold">
+                      {lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < today).length} overdue
+                    </span>
+                  )}
+                  <CloserStatusBadge status={lead.closer_status} />
+                </div>
               </div>
 
               {/* Assigned date */}
