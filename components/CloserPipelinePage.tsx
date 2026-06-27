@@ -315,7 +315,15 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                             className="h-5 w-5 rounded-full border-2 border-neutral-300 hover:border-emerald-500 hover:bg-emerald-50 transition-colors shrink-0" />
                         )}
                         {f.status === "done" && (
-                          <span className="text-emerald-500 text-xs">✓</span>
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="text-emerald-500 text-xs">✓</span>
+                            {f.completed_by && (
+                              <span className="text-[8px] text-neutral-400 whitespace-nowrap">{f.completed_by}</span>
+                            )}
+                            {f.completed_at && (
+                              <span className="text-[8px] text-neutral-400 font-mono">{f.completed_at.slice(5, 16).replace("T", " ")}</span>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}
