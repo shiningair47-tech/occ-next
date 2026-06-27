@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   CalendarDays, ChevronLeft, ChevronRight, ChevronDown, Search, PhoneOutgoing, PhoneCall,
   PhoneMissed, Target, ListChecks, CircleCheck, Flag, Users, Send, Clock,
@@ -59,12 +59,40 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
 
   const REASONS = ["Leads exhausted", "Quality issues", "Wrong numbers", "Request additional data"];
 
+  const seenOverdue = useRef<Set<string>>(new Set());
+  const isFirstLoad = useRef(true);
+
   const load = useCallback(async () => {
     const [lr, rr] = await Promise.all([
       fetch("/api/leads?scope=setter_queue"),
       fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "get_data_requests" }) }),
     ]);
-    if (lr.ok) { const d = await lr.json(); setLeads(d.leads ?? []); setBatches(d.batches ?? []); }
+    if (lr.ok) {
+      const d = await lr.json();
+      const updatedLeads: Lead[] = d.leads ?? [];
+      setLeads(updatedLeads);
+      setBatches(d.batches ?? []);
+
+      // Check for newly overdue followups (silent on first load)
+      const today = todayStr();
+      const newOverdueLeads: string[] = [];
+      updatedLeads.forEach(lead => {
+        lead.followups?.forEach((f: any) => {
+          if (f.status === "pending" && f.scheduled_date < today) {
+            if (!seenOverdue.current.has(f.id)) {
+              if (newOverdueLeads.length < 3 && !isFirstLoad.current) newOverdueLeads.push(lead.name);
+            }
+            seenOverdue.current.add(f.id);
+          }
+        });
+      });
+      isFirstLoad.current = false;
+      if (newOverdueLeads.length === 1) {
+        toast(`${newOverdueLeads[0]}'s followup is now overdue`);
+      } else if (newOverdueLeads.length > 1) {
+        toast(`${newOverdueLeads[0]} and ${newOverdueLeads.length - 1} other${newOverdueLeads.length > 2 ? "s" : ""} have overdue followups`);
+      }
+    }
     if (rr.ok) { const d = await rr.json(); setDataRequests(d.requests ?? []); }
   }, []);
 

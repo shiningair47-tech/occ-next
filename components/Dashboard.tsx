@@ -5,7 +5,8 @@ import {
   CircleAlert,
   Calendar,
 } from "lucide-react";
-import { ReactNode, useState, useEffect, useCallback } from "react";
+import { ReactNode, useState, useEffect, useCallback, useRef } from "react";
+import toast from "react-hot-toast";
 import { Lead } from "@/types";
 
 // ---- Helpers ----
@@ -330,9 +331,36 @@ function PipelineCard({ name, phone, status, color, touchpoints, appointmentDate
 export function CloserDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
 
+  const seenOverdue = useRef<Set<string>>(new Set());
+  const isFirstLoad = useRef(true);
+
   const load = useCallback(async () => {
     const res = await fetch("/api/leads?scope=closer_pipeline");
-    if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); }
+    if (res.ok) {
+      const d = await res.json();
+      const updatedLeads: Lead[] = d.leads ?? [];
+      setLeads(updatedLeads);
+
+      // Check for newly overdue followups (silent on first load)
+      const today = new Date().toISOString().slice(0, 10);
+      const newOverdueLeads: string[] = [];
+      updatedLeads.forEach(lead => {
+        lead.followups?.forEach((f: any) => {
+          if (f.status === "pending" && f.scheduled_date < today) {
+            if (!seenOverdue.current.has(f.id)) {
+              if (newOverdueLeads.length < 3 && !isFirstLoad.current) newOverdueLeads.push(lead.name);
+            }
+            seenOverdue.current.add(f.id);
+          }
+        });
+      });
+      isFirstLoad.current = false;
+      if (newOverdueLeads.length === 1) {
+        toast(`${newOverdueLeads[0]}'s followup is now overdue`);
+      } else if (newOverdueLeads.length > 1) {
+        toast(`${newOverdueLeads[0]} and ${newOverdueLeads.length - 1} other${newOverdueLeads.length > 2 ? "s" : ""} have overdue followups`);
+      }
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
