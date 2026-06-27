@@ -352,6 +352,11 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
                               {lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < todayStr()).length} overdue
                             </span>
                           )}
+                          {(lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date === todayStr()).length ?? 0) > 0 && (
+                            <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 text-[9px] font-bold">
+                              {lead.followups?.filter((f: any) => f.status === "pending" && f.scheduled_date === todayStr()).length} due today
+                            </span>
+                          )}
                           <SetterStatusBadge status={lead.setter_status} />
                         </div>
                         {isCalled && (

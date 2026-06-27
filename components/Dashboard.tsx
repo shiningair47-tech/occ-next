@@ -249,6 +249,8 @@ function PipelineCard({ name, phone, status, color, touchpoints, appointmentDate
   const today = new Date().toISOString().slice(0, 10);
   const hasOverdue = followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today);
   const overdueCount = followups?.filter((f: any) => f.status === "pending" && f.scheduled_date < today).length ?? 0;
+  const hasDueToday = followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today);
+  const dueTodayCount = followups?.filter((f: any) => f.status === "pending" && f.scheduled_date === today).length ?? 0;
   
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/50 transition-colors">
@@ -262,6 +264,11 @@ function PipelineCard({ name, phone, status, color, touchpoints, appointmentDate
             {hasOverdue && (
               <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-red-100 text-red-700 border border-red-300 text-[9px] font-bold">
                 {overdueCount} overdue
+              </span>
+            )}
+            {hasDueToday && (
+              <span className="inline-flex items-center justify-center h-5 px-1.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 text-[9px] font-bold">
+                {dueTodayCount} due today
               </span>
             )}
           </div>
