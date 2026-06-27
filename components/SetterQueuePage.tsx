@@ -108,7 +108,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   const calledToday = leads.filter(l => l.called_dates?.includes(selectedDate)).length;
   const totalCalled = leads.filter(l => (l.called_dates?.length ?? 0) > 0).length;
   const progressPct = totalLeads > 0 ? Math.round((calledToday / totalLeads) * 100) : 0;
-  const qualRate = totalCalled > 0 ? `${Math.round((qualifiedLeads / totalCalled) * 100)}%` : "0%";
+  const qualRate = totalLeads > 0 ? `${Math.round((qualifiedLeads / totalLeads) * 100)}%` : "0%";
   const pairedCloser = leads.length > 0 ? leads[0].closer : "";
   const pairLabel = userTeam || "";
 
