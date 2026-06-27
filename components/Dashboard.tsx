@@ -337,7 +337,14 @@ export function CloserDashboard() {
 
   useEffect(() => { load(); }, [load]);
 
-  const pipelineLeads = leads.filter(l => l.handoff_status === "accepted");
+  const today = new Date().toISOString().slice(0, 10);
+  const pipelineLeads = leads.filter(l => l.handoff_status === "accepted").sort((a, b) => {
+    const aScore = (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today) ? 0 : 1)
+                 + (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today) ? 0 : 1);
+    const bScore = (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today) ? 0 : 1)
+                 + (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today) ? 0 : 1);
+    return aScore - bScore;
+  });
 
   const activeCount = pipelineLeads.length;
   const hotCount = pipelineLeads.filter(l => l.closer_status === "hot").length;

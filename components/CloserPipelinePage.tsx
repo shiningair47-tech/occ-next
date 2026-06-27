@@ -72,6 +72,13 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
   const overdueCount = leads.filter(l => l.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today)).length;
   const dueTodayCount = leads.filter(l => l.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today)).length;
   const pairedSetter = leads.length > 0 ? leads[0].setter : "";
+  const sortedPipelineLeads = [...pipelineLeads].sort((a, b) => {
+    const aScore = (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today) ? 0 : 1)
+                 + (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today) ? 0 : 1);
+    const bScore = (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < today) ? 0 : 1)
+                 + (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === today) ? 0 : 1);
+    return aScore - bScore;
+  });
 
   const todayStr = () => new Date().toISOString().slice(0, 10);
   const [selectedDate, setSelectedDate] = useState(todayStr());
@@ -233,9 +240,9 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
       </div>
 
       {/* Pipeline cards */}
-      {pipelineLeads.length > 0 ? (
+      {sortedPipelineLeads.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {pipelineLeads.map(lead => (
+          {sortedPipelineLeads.map(lead => (
             <div key={lead.id} className="bg-white border border-neutral-200 rounded-lg p-4 hover:border-gold/40 transition-colors">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">

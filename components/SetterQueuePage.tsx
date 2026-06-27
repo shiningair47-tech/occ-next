@@ -101,7 +101,13 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   }
 
   const isToday = selectedDate === todayStr();
-  const dayLeads = leads.filter(l => filter === "all" || l.setter_status === filter);
+  const dayLeads = leads.filter(l => filter === "all" || l.setter_status === filter).sort((a, b) => {
+    const aScore = (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < todayStr()) ? 0 : 1)
+                 + (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === todayStr()) ? 0 : 1);
+    const bScore = (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < todayStr()) ? 0 : 1)
+                 + (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === todayStr()) ? 0 : 1);
+    return aScore - bScore;
+  });
   const totalLeads = leads.length;
   const pendingLeads = leads.filter(l => l.setter_status === "pending").length;
   const qualifiedLeads = leads.filter(l => l.setter_status === "qualified").length;
