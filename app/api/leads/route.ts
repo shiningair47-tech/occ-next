@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   let query = supabaseAdmin.from("leads").select("*");
 
   if (scope === "setter_queue") {
-    query = query.eq("setter", user.name).eq("setter_status", "pending");
+    query = query.eq("setter", user.name);
   } else if (scope === "closer_pipeline") {
     query = query.eq("closer", user.name).eq("setter_status", "qualified");
   } else if (!isAdmin) {
@@ -95,8 +95,8 @@ export async function POST(req: NextRequest) {
     }).select().single();
 
     // Insert leads
-    const leadRows = leads.map((l: { name: string; phone: string }) => ({
-      name: l.name, phone: l.phone, source: source || "",
+    const leadRows = leads.map((l: { name: string; phone: string; notes?: string }) => ({
+      name: l.name, phone: l.phone, notes: l.notes || body.notes || "", source: source || "",
       team, setter, closer,
       setter_status: "pending", closer_status: "",
       batch_id: batch.id,
@@ -279,6 +279,26 @@ export async function POST(req: NextRequest) {
       admin_note: adminNote || "",
       fulfilled_count: fulfilledCount || 0,
     }).eq("id", requestId);
+    return NextResponse.json({ ok: true });
+  }
+
+  // --- SETTER: handoff lead to closer ---
+  if (action === "handoff_lead") {
+    const { leadId, note } = body;
+    const now = new Date().toISOString();
+    await supabaseAdmin.from("leads").update({
+      handoff_status: "pending",
+      handoff_at: now,
+      handoff_by: user.name,
+      handoff_note: note || "",
+    }).eq("id", leadId);
+    return NextResponse.json({ ok: true });
+  }
+
+  // --- SETTER: update notes ---
+  if (action === "update_notes") {
+    const { leadId, notes } = body;
+    await supabaseAdmin.from("leads").update({ notes }).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }
 

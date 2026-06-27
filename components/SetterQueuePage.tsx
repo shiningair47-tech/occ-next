@@ -70,11 +70,12 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   useEffect(() => { load(); }, [load]);
 
   async function doAction(action: string, leadId: string, extra?: Record<string, unknown>) {
-    await fetch("/api/leads", {
+    const res = await fetch("/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, leadId, ...extra }),
     });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); toast.error(d.error || "Action failed"); return; }
     await load();
   }
 
@@ -390,7 +391,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
                     { label: "Wrong #", status: "wrong_number", cls: "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100", icon: PhoneOff },
                     { label: "Pending", status: "pending", cls: "bg-neutral-100 text-neutral-700 border border-neutral-200 hover:bg-neutral-200", icon: CircleDashed },
                   ].map(({ label, status, cls, icon: Icon }) => (
-                    <button key={status} onClick={() => doAction("qualify_lead", lead.id)}
+                    <button key={status} onClick={() => doAction("qualify_lead", lead.id, { status })}
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${cls}`}>
                       <Icon className="h-3.5 w-3.5" /><span>{label}</span>
                     </button>
@@ -414,7 +415,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
                         <CircleCheck className="h-3 w-3 text-emerald-700" /><span className="text-[10px] text-emerald-900 font-semibold">Accepted by closer · {lead.accepted_at}</span>
                       </div>
                     ) : (
-                      <button onClick={() => doAction("qualify_lead", lead.id)} disabled={!lead.closer}
+                      <button onClick={() => doAction("handoff_lead", lead.id)} disabled={!lead.closer}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-[11px] font-semibold transition-colors ${lead.closer ? "bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a]" : "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"}`}>
                         <Send className="h-3.5 w-3.5" /><span>Hand off to Closer</span>
                       </button>

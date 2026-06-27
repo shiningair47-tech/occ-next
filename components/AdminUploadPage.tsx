@@ -24,6 +24,7 @@ export default function AdminUploadPage() {
   const [batches, setBatches] = useState<BatchRow[]>([]);
   const [confirmation, setConfirmation] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [batchNotes, setBatchNotes] = useState("");
 
   async function loadData() {
     const res = await fetch("/api/leads?scope=admin_batches");
@@ -69,10 +70,10 @@ export default function AdminUploadPage() {
       body: JSON.stringify({
         action: "upload_batch",
         leads: parsedLeads,
-        team: uploadPair,
+        source,
+        notes: batchNotes,
         setter: team?.setter ?? "",
         closer: team?.closer ?? "",
-        source,
         label: `${uploadPair} · ${source} · ${now}`,
       }),
     });
@@ -196,6 +197,18 @@ export default function AdminUploadPage() {
             <div>
               <h3 className="text-lg font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Preview</h3>
               <p className="text-xs text-neutral-500 mt-0.5">{parsedLeads.length} leads ready for assignment</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">BATCH NOTES (OPTIONAL)</p>
+              <textarea value={batchNotes} onChange={e => setBatchNotes(e.target.value)}
+                placeholder="Add notes that will carry over to every lead in this batch"
+                className="w-full px-3 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none h-20" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">BATCH NOTES (OPTIONAL)</p>
+              <textarea value={batchNotes} onChange={e => setBatchNotes(e.target.value)}
+                placeholder="Add notes that will carry over to every lead in this batch"
+                className="w-full px-3 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none h-20" />
             </div>
             <button onClick={handleConfirm} disabled={uploading}
               className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-60">
