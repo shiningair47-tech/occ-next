@@ -163,6 +163,8 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                 d.setDate(d.getDate() + 1);
                 setSelectedDate(d.toISOString().slice(0, 10));
               }} className="px-2 py-1.5 hover:bg-neutral-100 text-neutral-600 hover:text-[#1a1a1a] transition-colors text-xs font-medium">→</button>
+              <button onClick={() => setSelectedDate(todayStr())}
+                className="px-2 py-1.5 bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">Today</button>
             </div>
             <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#1a1a1a] text-gold border border-gold/40 hover:bg-[#2a2a2a] text-[10px] font-semibold transition-colors">
               <Download className="h-3 w-3" /><span>Day CSV</span>
@@ -279,6 +281,43 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
                   ))}
                 </div>
               </div>
+
+              {/* Followup section */}
+              {lead.appointment_date && lead.followups && lead.followups.length > 0 && (
+                <div className="mb-3 pb-3 border-b border-neutral-100">
+                  <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">Followups</p>
+                  <div className="flex flex-col gap-1">
+                    {lead.followups.map((f: any) => (
+                      <div key={f.id} className={`flex items-center justify-between px-2 py-1 rounded-md text-[11px] ${
+                        f.status === "done" ? "bg-emerald-50/50 text-neutral-400 line-through" : "bg-[#faf8f3] text-[#1a1a1a]"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-semibold">{f.scheduled_date.slice(5)}</span>
+                          <span className="text-[10px]">{f.scheduled_time}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                            f.type === "arrival" ? "bg-emerald-100 text-emerald-700" :
+                            f.type.startsWith("confirmation") ? "bg-gold/10 text-gold-dark" :
+                            "bg-neutral-100 text-neutral-600"
+                          }`}>{f.type.replace("_", " ")}</span>
+                        </div>
+                        {f.status === "pending" && (
+                          <button onClick={() => doAction("mark_followup", lead.id, { followupId: f.id })}
+                            className="h-5 w-5 rounded-full border-2 border-neutral-300 hover:border-emerald-500 hover:bg-emerald-50 transition-colors shrink-0" />
+                        )}
+                        {f.status === "done" && (
+                          <span className="text-emerald-500 text-xs">✓</span>
+                        )}
+                      </div>
+                    ))}
+                    {lead.closer_status !== "arrived" && (
+                      <button onClick={() => doAction("mark_arrived", lead.id)}
+                        className="mt-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 text-[10px] font-semibold transition-colors">
+                        <span>✓</span> Arrived
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Appointment */}
               <div className="mb-3">

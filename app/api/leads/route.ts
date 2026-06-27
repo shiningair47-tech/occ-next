@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getSession } from "@/lib/session";
+import { FollowupItem } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,61 @@ export async function GET(req: NextRequest) {
   stats.replacements_open = count ?? 0;
 
   return NextResponse.json({ leads: allLeads, batches, stats });
+}
+
+function generateFollowups(appointmentDate: string): FollowupItem[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const apptDate = new Date(appointmentDate + "T00:00:00");
+  const followups: FollowupItem[] = [];
+  let id = 1;
+
+  // Every 2 days starting from today+2 until day before appointment
+  let nextDate = new Date(today);
+  nextDate.setDate(nextDate.getDate() + 2);
+
+  const dayBefore = new Date(apptDate);
+  dayBefore.setDate(dayBefore.getDate() - 1);
+  const dayBeforeStr = dayBefore.toISOString().slice(0, 10);
+
+  while (nextDate < dayBefore) {
+    const nextStr = nextDate.toISOString().slice(0, 10);
+    followups.push({
+      id: String(id++),
+      scheduled_date: nextStr,
+      scheduled_time: "11:00",
+      type: "regular",
+      status: "pending",
+    });
+    nextDate.setDate(nextDate.getDate() + 2);
+  }
+
+  // Day before: confirmation calls
+  followups.push({
+    id: String(id++),
+    scheduled_date: dayBeforeStr,
+    scheduled_time: "11:00",
+    type: "confirmation_am",
+    status: "pending",
+  });
+  followups.push({
+    id: String(id++),
+    scheduled_date: dayBeforeStr,
+    scheduled_time: "20:30",
+    type: "confirmation_pm",
+    status: "pending",
+  });
+
+  // Day of: arrival
+  followups.push({
+    id: String(id++),
+    scheduled_date: appointmentDate,
+    scheduled_time: "09:00",
+    type: "arrival",
+    status: "pending",
+  });
+
+  return followups;
 }
 
 export async function POST(req: NextRequest) {
@@ -165,10 +221,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // --- CLOSER: set appointment ---
+  // --- CLOSER: set appointment (generates followup schedule) ---
   if (action === "set_appointment") {
     const { leadId, date } = body;
-    await supabaseAdmin.from("leads").update({ appointment_date: date }).eq("id", leadId);
+    const followups = generateFollowups(date);
+    await supabaseAdmin.from("leads").update({ appointment_date: date, followups }).eq("id", leadId);
+    return NextResponse.json({ ok: true });
+  }
+
+  // --- GENERAL: mark a followup as done ---
+  if (action === "mark_followup") {
+    const { leadId, followupId } = body;
+    const { data: lead } = await supabaseAdmin.from("leads").select("followups").eq("id", leadId).single();
+    const updated = (lead?.followups || []).map((f: FollowupItem) =>
+      f.id === followupId ? { ...f, status: "done", completed_at: new Date().toISOString(), completed_by: user.name } : f
+    );
+    await supabaseAdmin.from("leads").update({ followups: updated }).eq("id", leadId);
+    return NextResponse.json({ ok: true });
+  }
+
+  // --- GENERAL: mark lead as arrived (completes all pending followups) ---
+  if (action === "mark_arrived") {
+    const { leadId } = body;
+    const { data: lead } = await supabaseAdmin.from("leads").select("followups").eq("id", leadId).single();
+    const updated = (lead?.followups || []).map((f: FollowupItem) =>
+      f.status === "pending" ? { ...f, status: "done", completed_at: new Date().toISOString(), completed_by: user.name } : f
+    );
+    await supabaseAdmin.from("leads").update({ closer_status: "arrived", followups: updated }).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }
 

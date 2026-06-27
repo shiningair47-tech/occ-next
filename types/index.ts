@@ -1,4 +1,4 @@
-﻿export type Role = "admin" | "setter" | "closer";
+export type Role = "admin" | "setter" | "closer";
 
 export interface User {
   email: string;
@@ -30,6 +30,16 @@ export type ViewKey =
   | "queue"
   | "pipeline";
 
+export interface FollowupItem {
+  id: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  type: "regular" | "confirmation_am" | "confirmation_pm" | "arrival";
+  status: "pending" | "done";
+  completed_at?: string;
+  completed_by?: string;
+}
+
 export interface Lead {
   id: string;
   name: string;
@@ -49,6 +59,7 @@ export interface Lead {
   t5: boolean;
   t6: boolean;
   appointment_date: string;
+  followups: FollowupItem[];
   created_at: string;
   assigned_date: string;
   called_dates: string[];
