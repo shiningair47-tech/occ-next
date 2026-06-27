@@ -193,6 +193,8 @@ export function SetterDashboard() {
   const pendingLeads = leads.filter(l => l.setter_status === "pending" || !l.setter_status).length;
   const dailyTarget = 15;
   const dailyPct = Math.min(Math.round((qualifiedToday / dailyTarget) * 100), 100);
+  const overdueCount = leads.filter(l => l.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < todayStr)).length;
+  const dueTodayCount = leads.filter(l => l.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === todayStr)).length;
 
   return (
     <div>
@@ -201,6 +203,10 @@ export function SetterDashboard() {
         <KpiCard label="Qualified Today" value={String(qualifiedToday)} change="" icon={CircleCheck} positive />
         <KpiCard label="Qualification Rate" value={qualRate} change="" icon={Target} positive />
         <KpiCard label="Queue Remaining" value={String(pendingLeads)} change="" icon={ListChecks} positive />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
+        <KpiCard label="Overdue Followups" value={String(overdueCount)} change="" icon={CircleAlert} positive={false} />
+        <KpiCard label="Due Today" value={String(dueTodayCount)} change="" icon={Calendar} positive />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
