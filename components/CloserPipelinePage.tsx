@@ -4,6 +4,15 @@ import { GitBranch, Flame, PlaneLanding, X, Inbox, Phone, Copy, CircleCheck, Rot
 import toast from "react-hot-toast";
 import { Lead } from "@/types";
 
+interface Batch {
+  id: string;
+  label: string;
+  source: string;
+  lead_count: number;
+  assigned_at: string;
+  uploaded_by: string;
+}
+
 function CloserStatusBadge({ status }: { status: string }) {
   const cfg: Record<string, { cls: string; label: string }> = {
     new: { cls: "bg-blue-50 text-blue-700 border-blue-200", label: "New" },
@@ -28,7 +37,7 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 
 export default function CloserPipelinePage({ userName, userTeam }: { userName: string; userTeam: string }) {
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [batches, setBatches] = useState<any[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [filter, setFilter] = useState("all");
 
   const load = useCallback(async () => {
