@@ -78,16 +78,16 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ leads: allLeads, batches, stats });
 }
 
-function generateFollowups(appointmentDate: string): FollowupItem[] {
+function generateFollowups(appointmentDate: string, frequencyDays: number = 2): FollowupItem[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const apptDate = new Date(appointmentDate + "T00:00:00");
   const followups: FollowupItem[] = [];
   let id = 1;
 
-  // Every 2 days starting from today+2 until day before appointment
+  // Every {frequencyDays} days starting from today+{frequencyDays} until day before appointment
   let nextDate = new Date(today);
-  nextDate.setDate(nextDate.getDate() + 2);
+  nextDate.setDate(nextDate.getDate() + frequencyDays);
 
   const dayBefore = new Date(apptDate);
   dayBefore.setDate(dayBefore.getDate() - 1);
@@ -102,7 +102,7 @@ function generateFollowups(appointmentDate: string): FollowupItem[] {
       type: "regular",
       status: "pending",
     });
-    nextDate.setDate(nextDate.getDate() + 2);
+    nextDate.setDate(nextDate.getDate() + frequencyDays);
   }
 
   // Day before: confirmation calls
@@ -220,17 +220,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  // --- CLOSER: update touchpoint note ---
+  if (action === "update_touchpoint_note") {
+    const { leadId, touchpointKey, note } = body;
+    const { data: lead } = await supabaseAdmin.from("leads").select("touchpoint_notes").eq("id", leadId).single();
+    const notes = (lead as any)?.touchpoint_notes || {};
+    notes[touchpointKey] = note;
+    await supabaseAdmin.from("leads").update({ touchpoint_notes: notes }).eq("id", leadId);
+    return NextResponse.json({ ok: true });
+  }
+
   // --- CLOSER: update closer status ---
   if (action === "update_closer_status") {
     const { leadId, status } = body;
-    await supabaseAdmin.from("leads").update({ closer_status: status }).eq("id", leadId);
+    const freq = status === "hot" ? 2 : status === "cold" ? 4 : null;
+    const updateData: Record<string, unknown> = { closer_status: status };
+    if (freq) updateData.followup_frequency = freq;
+    
+    // Regenerate followups if appointment exists and status changed to hot/cold
+    if (freq) {
+      const { data: lead } = await supabaseAdmin.from("leads").select("appointment_date").eq("id", leadId).single();
+      if (lead?.appointment_date) {
+        const followups = generateFollowups(lead.appointment_date, freq);
+        updateData.followups = followups;
+      }
+    }
+    
+    await supabaseAdmin.from("leads").update(updateData).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }
 
   // --- CLOSER: set appointment (generates followup schedule) ---
   if (action === "set_appointment") {
     const { leadId, date } = body;
-    const followups = generateFollowups(date);
+    const { data: currentLead } = await supabaseAdmin.from("leads").select("followup_frequency").eq("id", leadId).single();
+    const freq = (currentLead as any)?.followup_frequency || 2;
+    const followups = generateFollowups(date, freq);
     await supabaseAdmin.from("leads").update({ appointment_date: date, followups }).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }

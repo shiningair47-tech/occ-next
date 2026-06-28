@@ -61,6 +61,8 @@ export interface Lead {
   t6: boolean;
   appointment_date: string;
   followups: FollowupItem[];
+  followup_frequency?: number; // 2=hot (every 2 days), 4=cold (every 4 days)
+  touchpoint_notes?: Record<string, string>; // { "t1": "note", "whatsapp": "note" }
   created_at: string;
   assigned_date: string;
   called_dates: string[];
