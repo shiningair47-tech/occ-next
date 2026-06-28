@@ -1,4 +1,6 @@
 "use client";
+import { useState, useEffect, useRef, useCallback } from "react";
+import toast from "react-hot-toast";
 import {
   Gem, LayoutDashboard, Upload, UserCog, Users, RefreshCw, BarChart3,
   Trophy, ListChecks, GitBranch, LogOut, Eye, X, Shield, PhoneCall,
@@ -31,8 +33,8 @@ interface Props {
   children: React.ReactNode;
 }
 
-function NavLink({ label, icon: Icon, viewKey, active, onClick }: {
-  label: string; icon: React.ElementType; viewKey: ViewKey; active: boolean; onClick: () => void;
+function NavLink({ label, icon: Icon, viewKey, active, onClick, count }: {
+  label: string; icon: React.ElementType; viewKey: ViewKey; active: boolean; onClick: () => void; count?: number;
 }) {
   return (
     <button onClick={onClick}
@@ -42,6 +44,9 @@ function NavLink({ label, icon: Icon, viewKey, active, onClick }: {
       }>
       <Icon className="h-4 w-4" />
       <span className="text-sm tracking-wide">{label}</span>
+      {count !== undefined && count > 0 && (
+        <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">{count > 99 ? "99+" : count}</span>
+      )}
     </button>
   );
 }
@@ -63,22 +68,24 @@ function AdminNav({ current, onChange }: { current: ViewKey; onChange: (v: ViewK
   );
 }
 
-function SetterNav({ current, onChange }: { current: ViewKey; onChange: (v: ViewKey) => void }) {
+function SetterNav({ current, onChange, followupCount }: { current: ViewKey; onChange: (v: ViewKey) => void; followupCount?: number }) {
   return (
     <div className="flex flex-col gap-1">
       <NavLink label="Dashboard" icon={LayoutDashboard} viewKey="dashboard" active={current === "dashboard"} onClick={() => onChange("dashboard")} />
       <NavLink label="My Queue" icon={ListChecks} viewKey="queue" active={current === "queue"} onClick={() => onChange("queue")} />
       <NavLink label="Leaderboard" icon={Trophy} viewKey="leaderboard" active={current === "leaderboard"} onClick={() => onChange("leaderboard")} />
+      <NavLink label="Followups" icon={ListChecks} viewKey="followups" count={followupCount} active={current === "followups"} onClick={() => onChange("followups")} />
     </div>
   );
 }
 
-function CloserNav({ current, onChange }: { current: ViewKey; onChange: (v: ViewKey) => void }) {
+function CloserNav({ current, onChange, followupCount }: { current: ViewKey; onChange: (v: ViewKey) => void; followupCount?: number }) {
   return (
     <div className="flex flex-col gap-1">
       <NavLink label="Dashboard" icon={LayoutDashboard} viewKey="dashboard" active={current === "dashboard"} onClick={() => onChange("dashboard")} />
       <NavLink label="Pipeline" icon={GitBranch} viewKey="pipeline" active={current === "pipeline"} onClick={() => onChange("pipeline")} />
       <NavLink label="Leaderboard" icon={Trophy} viewKey="leaderboard" active={current === "leaderboard"} onClick={() => onChange("leaderboard")} />
+      <NavLink label="Followups" icon={ListChecks} viewKey="followups" count={followupCount} active={current === "followups"} onClick={() => onChange("followups")} />
     </div>
   );
 }
@@ -91,6 +98,44 @@ export default function Shell({
     previewRole, previewEmail, previewRoleLabel, effectiveRoleLabel, memberPreviewOptions } = identity;
 
   const effectiveRole = effectiveUser.role;
+
+  const [followupCount, setFollowupCount] = useState(0);
+  const seenOverdue = useRef<Set<string>>(new Set());
+  const isFirstLoad = useRef(true);
+
+  const fetchFollowupCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/leads/followup-count");
+      if (!res.ok) return;
+      const data = await res.json();
+      const { pending, overdueLeads } = data;
+      setFollowupCount(pending || 0);
+
+      // Toast for NEWLY overdue followups (skip on first load)
+      if (!isFirstLoad.current && overdueLeads?.length > 0) {
+        const newOnes = (overdueLeads as string[]).filter(n => !seenOverdue.current.has(n));
+        if (newOnes.length > 0) {
+          newOnes.forEach(n => seenOverdue.current.add(n));
+          const first = newOnes[0];
+          if (newOnes.length === 1) {
+            toast(`${first}'s followup is now overdue`);
+          } else {
+            toast(`${first} and ${newOnes.length - 1} other${newOnes.length > 2 ? "s" : ""} have overdue followups`);
+          }
+        }
+      }
+      if (isFirstLoad.current) {
+        isFirstLoad.current = false;
+        overdueLeads?.forEach((n: string) => seenOverdue.current.add(n));
+      }
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => {
+    fetchFollowupCount();
+    const interval = setInterval(fetchFollowupCount, 60000);
+    return () => clearInterval(interval);
+  }, [fetchFollowupCount]);
 
   const headerTitles: Record<string, string> = {
     admin: "Operations Command Center",
@@ -122,9 +167,9 @@ export default function Shell({
           <div>
             <p className="text-[10px] font-semibold tracking-[0.2em] text-neutral-400 px-4 mb-3 mt-6">WORKSPACE</p>
             {effectiveRole === "setter" ? (
-              <SetterNav current={currentView} onChange={onViewChange} />
+              <SetterNav current={currentView} onChange={onViewChange} followupCount={followupCount} />
             ) : effectiveRole === "closer" ? (
-              <CloserNav current={currentView} onChange={onViewChange} />
+              <CloserNav current={currentView} onChange={onViewChange} followupCount={followupCount} />
             ) : (
               <AdminNav current={currentView} onChange={onViewChange} />
             )}

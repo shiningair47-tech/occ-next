@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { GitBranch, Flame, PlaneLanding, X, Inbox, Phone, Copy, CircleCheck, RotateCcw, Calendar, Snowflake, Users, Download, Boxes } from "lucide-react";
+import { GitBranch, Flame, PlaneLanding, X, Inbox, Phone, Copy, CircleCheck, RotateCcw, Calendar, Snowflake, Users, Download, Boxes, Search } from "lucide-react";
+import { TableSkeleton, KpiSkeleton } from "./LoadingSkeleton";
 import toast from "react-hot-toast";
 import { Lead } from "@/types";
 
@@ -21,7 +22,7 @@ function CloserStatusBadge({ status }: { status: string }) {
     arrived: { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Arrived" },
     lost: { cls: "bg-neutral-200 text-neutral-600 border-neutral-300", label: "Lost" },
   };
-  const c = cfg[status] ?? { cls: "bg-neutral-100 text-neutral-700 border-neutral-200", label: status };
+  const c = cfg[status] ?? { cls: "bg-blue-50 text-blue-700 border-blue-200", label: status || "New" };
   return <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border w-fit ${c.cls}`}>{c.label}</span>;
 }
 
@@ -37,13 +38,16 @@ function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon:
 
 export default function CloserPipelinePage({ userName, userTeam }: { userName: string; userTeam: string }) {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   const seenOverdue = useRef<Set<string>>(new Set());
   const isFirstLoad = useRef(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const res = await fetch("/api/leads?scope=closer_pipeline");
     if (res.ok) {
       const d = await res.json();
@@ -88,8 +92,13 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
     await doAction("update_touchpoints", leadId, { touchpoint: `t${key}`, value: !current });
   }
 
-  const filteredLeads = leads.filter(l => filter === "all" || l.closer_status === filter);
-  const intakeLeads = leads.filter(l => l.handoff_status === "pending" && l.closer_status === "");
+  const filteredLeads = leads.filter(l => {
+    const q = search.toLowerCase();
+    const matchesStatus = filter === "all" || (filter === "new" ? (!l.closer_status || l.closer_status === "new") : l.closer_status === filter);
+    const matchesSearch = !q || l.name.toLowerCase().includes(q) || l.source.toLowerCase().includes(q) || l.phone.includes(q);
+    return matchesStatus && matchesSearch;
+  });
+  const intakeLeads = leads.filter(l => l.handoff_status === "pending" && (!l.closer_status || l.closer_status === ""));
   const pipelineLeads = filteredLeads.filter(l => l.handoff_status === "accepted");
 
   const total = pipelineLeads.length;
@@ -257,7 +266,13 @@ export default function CloserPipelinePage({ userName, userTeam }: { userName: s
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative max-w-xs">
+              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name, phone or source..."
+                className="w-full pl-9 pr-3 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map(f => (
             <button key={f.value} onClick={() => setFilter(f.value)}
               className={`px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${filter === f.value ? "bg-[#1a1a1a] text-gold border-gold/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>

@@ -11,6 +11,7 @@ import CloserPipelinePage from "@/components/CloserPipelinePage";
 import ReplacementsPage from "@/components/ReplacementsPage";
 import LeaderboardPage from "@/components/LeaderboardPage";
 import ReportsPage from "@/components/ReportsPage";
+import FollowupsPage from "@/components/FollowupsPage";
 import { allowedViewsFor } from "@/lib/roleViews";
 import { ViewKey, MemberPreviewOption, Role } from "@/types";
 
@@ -127,6 +128,7 @@ export default function Home() {
       case "leaderboard": return <LeaderboardPage userTeam={effectiveUser.team} effectiveRole={effectiveRole} />;
       case "queue":       return <SetterQueuePage userName={effectiveUser.name} userTeam={effectiveUser.team} />;
       case "pipeline":    return <CloserPipelinePage userName={effectiveUser.name} userTeam={effectiveUser.team} />;
+      case "followups":  return <FollowupsPage userName={effectiveUser.name} />;
       default:            return <AdminDashboard />;
     }
   }

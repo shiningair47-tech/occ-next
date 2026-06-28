@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Lead } from "@/types";
+import { TableSkeleton, KpiSkeleton } from "./LoadingSkeleton";
 interface Batch { id: string; label: string; source: string; lead_count: number; assigned_at: string; uploaded_by: string; }
 
 function formatDate(d: Date) { return d.toISOString().slice(0, 10); }
@@ -48,6 +49,7 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [dateSearch, setDateSearch] = useState("");
   const [dateSearchError, setDateSearchError] = useState("");
+  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("pending");
   const [requestReason, setRequestReason] = useState("Leads exhausted");
   const [requestCount, setRequestCount] = useState("10");
@@ -61,8 +63,10 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
 
   const seenOverdue = useRef<Set<string>>(new Set());
   const isFirstLoad = useRef(true);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const [lr, rr] = await Promise.all([
       fetch("/api/leads?scope=setter_queue"),
       fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "get_data_requests" }) }),
@@ -129,16 +133,34 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
   }
 
   const isToday = selectedDate === todayStr();
-  const dayLeads = leads.filter(l => filter === "all" || l.setter_status === filter).sort((a, b) => {
+  const dayLeads = leads.filter(l => {
+    const q = search.toLowerCase();
+    const matchesStatus = filter === "all" || l.setter_status === filter;
+    const matchesSearch = !q || l.name.toLowerCase().includes(q) || l.source.toLowerCase().includes(q) || l.phone.includes(q);
+    return matchesStatus && matchesSearch;
+  }).sort((a, b) => {
     const aScore = (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < todayStr()) ? 0 : 1)
                  + (a.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === todayStr()) ? 0 : 1);
     const bScore = (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date < todayStr()) ? 0 : 1)
                  + (b.followups?.some((f: any) => f.status === "pending" && f.scheduled_date === todayStr()) ? 0 : 1);
     return aScore - bScore;
   });
+  if (loading) return (
+    <div>
+      <div className="mb-6">
+        <div className="h-4 w-32 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-64 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-96 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <KpiSkeleton count={4} />
+      <TableSkeleton rows={8} cols={5} />
+    </div>
+  );
+
   const totalLeads = leads.length;
   const pendingLeads = leads.filter(l => l.setter_status === "pending").length;
   const qualifiedLeads = leads.filter(l => l.setter_status === "qualified").length;
+  const apptFixedLeads = leads.filter(l => l.setter_status === "appointment_fixed").length;
   const badLeads = leads.filter(l => l.setter_status === "bad" || l.setter_status === "wrong_number").length;
   const calledToday = leads.filter(l => l.called_dates?.includes(selectedDate)).length;
   const totalCalled = leads.filter(l => (l.called_dates?.length ?? 0) > 0).length;
@@ -355,8 +377,14 @@ export default function SetterQueuePage({ userName, userTeam }: { userName: stri
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {[["Pending","pending",pendingLeads],["Qualified","qualified",qualifiedLeads],["All","all",totalLeads]].map(([l,v,c]) => (
+        <div className="relative max-w-xs">
+              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name, phone or source..."
+                className="w-full pl-9 pr-3 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30" />
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+          {[["Pending","pending",pendingLeads],["Qualified","qualified",qualifiedLeads],["Appt Fixed","appointment_fixed",apptFixedLeads],["Bad","bad",leads.filter(l => l.setter_status === "bad").length],["Wrong #","wrong_number",leads.filter(l => l.setter_status === "wrong_number").length],["All","all",totalLeads]].map(([l,v,c]) => (
             <button key={String(v)} onClick={() => setFilter(String(v))}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-medium tracking-wide ${filter === String(v) ? "bg-[#1a1a1a] text-gold border-gold/40" : "bg-white text-neutral-600 border-neutral-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"}`}>
               <span>{l}</span><span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/20">{c}</span>

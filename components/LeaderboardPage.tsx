@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Crown, Trophy, Medal, Users, PlaneLanding, Target, Activity } from "lucide-react";
+import { TableSkeleton, KpiSkeleton } from "./LoadingSkeleton";
 
 interface TeamRow {
   name: string; setter: string; closer: string;
@@ -43,8 +44,10 @@ function RankBadge({ rank }: { rank: number }) {
 
 export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam: string; effectiveRole: string }) {
   const [teams, setTeams] = useState<TeamRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const [lr, tr] = await Promise.all([
       fetch("/api/leads?scope=all"),
       fetch("/api/teams"),
@@ -63,7 +66,7 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
       const setter = members.find(u => u.role === "setter")?.name ?? "";
       const closer = members.find(u => u.role === "closer")?.name ?? "";
       const leads = teamLeads.length;
-      const qualified = teamLeads.filter(l => l.setter_status === "qualified").length;
+      const qualified = teamLeads.filter(l => l.setter_status === "qualified" || l.setter_status === "appointment_fixed").length;
       const arrived = teamLeads.filter(l => l.closer_status === "arrived").length;
       const arrival_rate = leads > 0 ? Math.round((arrived / leads) * 1000) / 10 : 0;
       return { name: t, setter, closer, leads, qualified, arrived, arrival_rate, rank: 0 };
@@ -73,6 +76,7 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
     rows.sort((a, b) => b.arrived - a.arrived || b.arrival_rate - a.arrival_rate);
     rows.forEach((r, i) => { r.rank = i + 1; });
     setTeams(rows);
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -81,6 +85,18 @@ export default function LeaderboardPage({ userTeam, effectiveRole }: { userTeam:
   const totalArrivals = teams.reduce((s, t) => s + t.arrived, 0);
   const totalQualified = teams.reduce((s, t) => s + t.qualified, 0);
   const totalLeads = teams.reduce((s, t) => s + t.leads, 0);
+
+  if (loading) return (
+    <div>
+      <div className="mb-6">
+        <div className="h-4 w-32 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-64 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-96 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <KpiSkeleton count={4} />
+      <TableSkeleton rows={6} cols={6} />
+    </div>
+  );
 
   const subtitles: Record<string, string> = {
     admin: "Real-time rankings across all active teams based on arrivals and conversions.",

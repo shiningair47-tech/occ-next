@@ -8,6 +8,7 @@ import {
 import { ReactNode, useState, useEffect, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import { Lead } from "@/types";
+import { TableSkeleton, KpiSkeleton } from "./LoadingSkeleton";
 
 // ---- Helpers ----
 function KpiCard({ label, value, change, icon: Icon, positive = true }: {
@@ -155,7 +156,7 @@ export function AdminDashboard({ oversight }: { oversight?: ReactNode }) {
 }
 
 // ---- Setter Dashboard ----
-function QueueItem({ name, phone, source, time }: { name: string; phone: string; source: string; time: string }) {
+function QueueItem({ name, phone, source, time, status }: { name: string; phone: string; source: string; time: string; status?: string }) {
   return (
     <div className="flex items-center justify-between p-4 border-b border-neutral-100 hover:bg-[#faf8f3] transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
@@ -169,6 +170,7 @@ function QueueItem({ name, phone, source, time }: { name: string; phone: string;
       </div>
       <div className="flex items-center gap-3">
         <StatusBadge label={source} color="gold" />
+        {status && <StatusBadge label={status} color={status === "qualified" || status === "appointment_fixed" ? "green" : status === "bad" || status === "wrong_number" ? "red" : "gray"} />}
         <span className="text-xs text-neutral-400">{time}</span>
       </div>
     </div>
@@ -177,18 +179,41 @@ function QueueItem({ name, phone, source, time }: { name: string; phone: string;
 
 export function SetterDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
   const todayStr = new Date().toISOString().slice(0, 10);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const res = await fetch("/api/leads?scope=setter_queue");
     if (res.ok) { const d = await res.json(); setLeads(d.leads ?? []); }
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   const totalLeads = leads.length;
   const calledToday = leads.filter(l => l.called_dates?.includes(todayStr)).length;
-  const qualifiedToday = leads.filter(l => l.setter_status === "qualified").length;
+  if (loading) return (
+    <div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <KpiSkeleton count={3} />
+          <div className="bg-white border border-neutral-200 rounded-lg p-5">
+            <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+            <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+            <TableSkeleton rows={5} cols={4} />
+          </div>
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+          <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+          <div className="h-[200px] bg-neutral-100 animate-pulse rounded" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const qualifiedToday = leads.filter(l => l.setter_status === "qualified" || l.setter_status === "appointment_fixed").length;
   const qualRate = totalLeads > 0 ? Math.round((qualifiedToday / totalLeads) * 100) + "%" : "0%";
   const pendingLeads = leads.filter(l => l.setter_status === "pending" || !l.setter_status).length;
   const dailyTarget = 15;
@@ -213,7 +238,7 @@ export function SetterDashboard() {
           <SectionTitle title="Today's Queue" subtitle="Leads assigned to you, ready to call" />
           <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
             {leads.length > 0 ? leads.slice(0, 10).map(l => (
-              <QueueItem key={l.id} name={l.name} phone={l.phone} source={l.source || "-"} time={l.assigned_at ? new Date(l.assigned_at).toLocaleString() : "-"} />
+              <QueueItem key={l.id} name={l.name} phone={l.phone} source={l.source || "-"} time={l.assigned_at ? new Date(l.assigned_at).toLocaleString() : "-"} status={l.setter_status} />
             )) : (
               <div className="p-8 text-center">
                 <p className="text-sm text-neutral-500">No leads assigned yet</p>
@@ -336,6 +361,7 @@ function PipelineCard({ name, phone, status, color, touchpoints, appointmentDate
 
 export function CloserDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const seenOverdue = useRef<Set<string>>(new Set());
   const isFirstLoad = useRef(true);
@@ -346,6 +372,7 @@ export function CloserDashboard() {
       const d = await res.json();
       const updatedLeads: Lead[] = d.leads ?? [];
       setLeads(updatedLeads);
+      setLoading(false);
 
       // Check for newly overdue followups (silent on first load)
       const today = new Date().toISOString().slice(0, 10);

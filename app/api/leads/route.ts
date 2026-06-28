@@ -35,7 +35,11 @@ export async function GET(req: NextRequest) {
   if (scope === "setter_queue") {
     query = query.eq("setter", user.name);
   } else if (scope === "closer_pipeline") {
-    query = query.eq("closer", user.name).eq("setter_status", "qualified");
+    query = query.eq("closer", user.name).in("setter_status", ["qualified", "appointment_fixed"]);
+  } else if (scope === "followups") {
+    // Fetch leads with pending followups for this user
+    const userFilter = user.role === "setter" ? { setter: user.name } : { closer: user.name };
+    query = query.match(userFilter).not("appointment_date", "eq", "").not("followups", "eq", null);
   } else if (!isAdmin) {
     // Non-admins only see their own leads
     if (user.role === "setter") query = query.eq("setter", user.name);
@@ -63,7 +67,7 @@ export async function GET(req: NextRequest) {
   const stats = {
     total: allLeads.length,
     pending: allLeads.filter((l) => l.setter_status === "pending").length,
-    qualified: allLeads.filter((l) => l.setter_status === "qualified").length,
+    qualified: allLeads.filter((l) => l.setter_status === "qualified" || l.setter_status === "appointment_fixed").length,
     replacements_open: 0,
   };
 
@@ -186,12 +190,14 @@ export async function POST(req: NextRequest) {
 
   // --- SETTER: qualify lead ---
   if (action === "qualify_lead") {
-    const { leadId } = body;
-    await supabaseAdmin.from("leads").update({
-      setter_status: "qualified",
-      qualified_at: new Date().toISOString().slice(0, 10),
-      handoff_status: "pending",
-    }).eq("id", leadId);
+    const { leadId, status } = body;
+    const newStatus = status || "qualified";
+    const updateData: Record<string, unknown> = { setter_status: newStatus };
+    if (newStatus === "qualified" || newStatus === "appointment_fixed") {
+      updateData.qualified_at = new Date().toISOString().slice(0, 10);
+      updateData.handoff_status = "pending";
+    }
+    await supabaseAdmin.from("leads").update(updateData).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }
 
@@ -256,6 +262,7 @@ export async function POST(req: NextRequest) {
     const { leadId } = body;
     await supabaseAdmin.from("leads").update({
       handoff_status: "accepted",
+      closer_status: "new",
       accepted_at: new Date().toISOString(),
     }).eq("id", leadId);
     return NextResponse.json({ ok: true });

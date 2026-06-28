@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Activity, Target, PlaneLanding, RefreshCw } from "lucide-react";
+import { KpiSkeleton } from "./LoadingSkeleton";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, FunnelChart, Funnel, LabelList,
@@ -56,14 +57,17 @@ export default function ReportsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [openReps, setOpenReps] = useState(0);
   const [range, setRange] = useState<Range>("30d");
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const [lr, rr] = await Promise.all([
       fetch("/api/leads?scope=all"),
       fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "get_replacements" }) }),
     ]);
     if (lr.ok) { const d = await lr.json(); setLeads(d.leads ?? []); }
     if (rr.ok) { const d = await rr.json(); setOpenReps((d.replacements ?? []).filter((r: { status: string }) => r.status === "open").length); }
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -73,8 +77,43 @@ export default function ReportsPage() {
   cutoff.setDate(cutoff.getDate() - rangeDays(range));
   const filteredLeads = range === "all" ? leads : leads.filter(l => l.assigned_at && new Date(l.assigned_at) >= cutoff);
 
+  if (loading) return (
+    <div>
+      <div className="mb-6">
+        <div className="h-4 w-24 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-72 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <KpiSkeleton count={4} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+          <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+          <div className="h-[300px] bg-neutral-100 rounded" />
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+          <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+          <div className="h-[280px] bg-neutral-100 rounded" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+          <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+          <div className="h-[280px] bg-neutral-100 rounded" />
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+          <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+          <div className="h-[280px] bg-neutral-100 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+
   const total = filteredLeads.length;
-  const qualified = filteredLeads.filter(l => l.setter_status === "qualified" || l.closer_status).length;
+  const qualified = filteredLeads.filter(l => (l.setter_status === "qualified" || l.setter_status === "appointment_fixed") || l.closer_status).length;
   const arrived = filteredLeads.filter(l => l.closer_status === "arrived").length;
   const qualRate = total > 0 ? `${Math.round((qualified / total) * 100)}%` : "0%";
   const arrRate = total > 0 ? `${Math.round((arrived / total) * 100)}%` : "0%";
@@ -95,7 +134,7 @@ export default function ReportsPage() {
     return {
       team: t.replace("Pair ", "").replace("Team ", ""),
       total: tl.length,
-      qualified: tl.filter(l => l.setter_status === "qualified").length,
+      qualified: tl.filter(l => l.setter_status === "qualified" || l.setter_status === "appointment_fixed").length,
       arrived: tl.filter(l => l.closer_status === "arrived").length,
     };
   }).sort((a, b) => b.total - a.total);
@@ -106,17 +145,20 @@ export default function ReportsPage() {
     const sl = filteredLeads.filter(l => l.setter === s);
     return {
       name: s.split(" ")[0],
-      qualified: sl.filter(l => l.setter_status === "qualified").length,
+      qualified: sl.filter(l => l.setter_status === "qualified" || l.setter_status === "appointment_fixed").length,
       flagged: sl.filter(l => l.setter_status === "bad" || l.setter_status === "wrong_number").length,
     };
   });
 
   // Closer outcomes chart
   const closerStatuses = ["new", "hot", "cold", "arrived", "lost"];
-  const closerChart = closerStatuses.map(s => ({
-    name: s.charAt(0).toUpperCase() + s.slice(1),
-    value: filteredLeads.filter(l => l.closer_status === s).length,
-  }));
+  const closerChart = [
+    { name: "Unworked", value: filteredLeads.filter(l => !l.closer_status).length },
+    ...closerStatuses.map(s => ({
+      name: s.charAt(0).toUpperCase() + s.slice(1),
+      value: filteredLeads.filter(l => l.closer_status === s).length,
+    })),
+  ];
 
   const RANGES: { label: string; value: Range }[] = [
     { label: "7 Days", value: "7d" }, { label: "30 Days", value: "30d" },

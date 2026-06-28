@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { User, ApiUser } from "@/types";
+import { TableSkeleton, KpiSkeleton } from "./LoadingSkeleton";
 
 interface PairAssignment {
   name: string; setter: string; closer: string; status: string; members: number;
@@ -153,6 +154,21 @@ export default function UsersPage() {
     const status = setter && closer ? "complete" : setter || closer ? "partial" : "empty";
     return { name: t, setter, closer, status, members: members.length };
   });
+
+  if (loading) return (
+    <div>
+      <div className="mb-6">
+        <div className="h-4 w-24 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-72 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <KpiSkeleton count={5} />
+      <div className="bg-white border border-neutral-200 rounded-lg p-5 mb-6">
+        <div className="h-[200px] bg-neutral-100 animate-pulse rounded" />
+      </div>
+      <TableSkeleton rows={8} cols={5} />
+    </div>
+  );
 
   const totalUsers = users.length;
   const activeUsers = users.filter(u => u.active).length;

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ScanLine, CircleCheck, PackageOpen, Download, Sparkles, User, CircleAlert, ChevronDown } from "lucide-react";
+import { TableSkeleton } from "./LoadingSkeleton";
 import toast from "react-hot-toast";
 import { parsePaste, ParsedLead } from "@/lib/parsePaste";
 
@@ -25,8 +26,10 @@ export default function AdminUploadPage() {
   const [confirmation, setConfirmation] = useState("");
   const [uploading, setUploading] = useState(false);
   const [batchNotes, setBatchNotes] = useState("");
+  const [loading, setLoading] = useState(true);
 
   async function loadData() {
+    setLoading(true);
     const res = await fetch("/api/leads?scope=admin_batches");
     if (res.ok) {
       const data = await res.json();
@@ -93,6 +96,29 @@ export default function AdminUploadPage() {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = `${b.label.replace(/[^a-z0-9]/gi, "_")}.csv`; a.click();
   }
+
+  if (loading) return (
+    <div className="p-8">
+      <div className="mb-6">
+        <div className="h-4 w-24 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-64 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-96 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-[350px] bg-neutral-100 animate-pulse rounded" />
+        </div>
+        <div className="bg-white border border-neutral-200 rounded-lg p-5">
+          <div className="h-[350px] bg-neutral-100 animate-pulse rounded" />
+        </div>
+      </div>
+      <div className="mt-10">
+        <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-3 w-56 bg-neutral-200 animate-pulse rounded mb-4" />
+        <TableSkeleton rows={3} cols={6} />
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -197,12 +223,6 @@ export default function AdminUploadPage() {
             <div>
               <h3 className="text-lg font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Preview</h3>
               <p className="text-xs text-neutral-500 mt-0.5">{parsedLeads.length} leads ready for assignment</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">BATCH NOTES (OPTIONAL)</p>
-              <textarea value={batchNotes} onChange={e => setBatchNotes(e.target.value)}
-                placeholder="Add notes that will carry over to every lead in this batch"
-                className="w-full px-3 py-2.5 rounded-md border border-neutral-200 bg-white text-sm text-[#1a1a1a] placeholder-neutral-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none h-20" />
             </div>
             <div>
               <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">BATCH NOTES (OPTIONAL)</p>

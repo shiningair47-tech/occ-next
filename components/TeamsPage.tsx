@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Users, Plus, UserMinus, UserPlus, Trash2, CircleAlert, CircleCheck, ChevronDown } from "lucide-react";
+import { CardSkeleton } from "./LoadingSkeleton";
 import toast from "react-hot-toast";
 
 interface TeamCard {
@@ -39,10 +40,12 @@ export default function TeamsPage() {
   const [createError, setCreateError] = useState("");
   const [createSuccess, setCreateSuccess] = useState("");
   const [assignSelects, setAssignSelects] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
   async function load() {
+    setLoading(true);
     const res = await fetch("/api/teams");
-    if (!res.ok) return;
+    if (!res.ok) setLoading(false); return;
     const data = await res.json();
     // Build team cards from teams + users
     const allTeams: string[] = data.teams;
@@ -77,6 +80,7 @@ export default function TeamsPage() {
     }));
     setSetterOptions(setters);
     setCloserOptions(closers);
+    setLoading(false);
   }
 
   useEffect(() => { load(); }, []);
@@ -138,6 +142,20 @@ export default function TeamsPage() {
   const complete = teams.filter(t => t.status === "complete").length;
   const partial = teams.filter(t => t.status === "partial").length;
   const empty = teams.filter(t => t.status === "empty").length;
+
+  if (loading) return (
+    <div>
+      <div className="mb-6">
+        <div className="h-4 w-24 bg-neutral-200 animate-pulse rounded mb-2" />
+        <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded mb-1" />
+        <div className="h-4 w-96 bg-neutral-200 animate-pulse rounded" />
+      </div>
+      <div className="bg-white border border-neutral-200 rounded-lg p-5 mb-6">
+        <div className="h-[200px] bg-neutral-100 animate-pulse rounded" />
+      </div>
+      <CardSkeleton count={3} />
+    </div>
+  );
 
   return (
     <div>

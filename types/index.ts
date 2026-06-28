@@ -28,7 +28,8 @@ export type ViewKey =
   | "reports"
   | "leaderboard"
   | "queue"
-  | "pipeline";
+  | "pipeline"
+  | "followups";
 
 export interface FollowupItem {
   id: string;
