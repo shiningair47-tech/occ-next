@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
   } else if (scope === "closer_pipeline") {
     query = query.eq("closer", user.name).in("setter_status", ["qualified", "appointment_fixed"]);
   } else if (scope === "followups") {
-    // Fetch leads with pending followups for this user
+    // Show leads in followup stage: T1 clicked, or has appointment with followups
     const userFilter = user.role === "setter" ? { setter: user.name } : { closer: user.name };
-    query = query.match(userFilter).not("appointment_date", "eq", "").not("followups", "eq", null);
+    query = query.match(userFilter).or("t1.eq.true,appointment_date.neq.");
   } else if (!isAdmin) {
     // Non-admins only see their own leads
     if (user.role === "setter") query = query.eq("setter", user.name);
@@ -216,7 +216,39 @@ export async function POST(req: NextRequest) {
   // --- CLOSER: update touchpoints ---
   if (action === "update_touchpoints") {
     const { leadId, touchpoint, value } = body;
-    await supabaseAdmin.from("leads").update({ [touchpoint]: value }).eq("id", leadId);
+    const updateData: Record<string, unknown> = { [touchpoint]: value };
+
+    // When T1 is clicked by closer, auto-enter followup section with cold schedule (every 4 days)
+    if (touchpoint === "t1" && value === true) {
+      updateData.closer_status = "cold";
+      updateData.followup_frequency = 4;
+
+      const { data: lead } = await supabaseAdmin.from("leads").select("appointment_date").eq("id", leadId).single();
+      if (lead?.appointment_date) {
+        // Full schedule if appointment exists
+        updateData.followups = generateFollowups(lead.appointment_date, 4);
+      } else {
+        // Generate 6 regular followups every 4 days starting 4 days from now
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const followups: FollowupItem[] = [];
+        let nextDate = new Date(today);
+        nextDate.setDate(nextDate.getDate() + 4);
+        for (let i = 0; i < 6; i++) {
+          followups.push({
+            id: String(i + 1),
+            scheduled_date: nextDate.toISOString().slice(0, 10),
+            scheduled_time: "11:00",
+            type: "regular",
+            status: "pending",
+          });
+          nextDate.setDate(nextDate.getDate() + 4);
+        }
+        updateData.followups = followups;
+      }
+    }
+
+    await supabaseAdmin.from("leads").update(updateData).eq("id", leadId);
     return NextResponse.json({ ok: true });
   }
 

@@ -54,7 +54,7 @@ export default function FollowupsPage({ userName }: Props) {
       const res = await fetch("/api/leads?scope=followups");
       if (!res.ok) { setError("Failed to load followups."); setLoading(false); return; }
       const data = await res.json();
-      setLeads((data.leads || []).filter((l: Lead) => l.followups?.some(f => f.status === "pending")));
+      setLeads((data.leads || []).filter((l: Lead) => l.t1 || l.followups?.some(f => f.status === "pending")));
     } catch {
       setError("Network error loading followups.");
     } finally {
@@ -67,7 +67,7 @@ export default function FollowupsPage({ userName }: Props) {
       const res = await fetch("/api/leads?scope=followups");
       if (res.ok) {
         const data = await res.json();
-        setLeads((data.leads || []).filter((l: Lead) => l.followups?.some(f => f.status === "pending")));
+        setLeads((data.leads || []).filter((l: Lead) => l.t1 || l.followups?.some(f => f.status === "pending")));
       }
     } catch {}
   }
