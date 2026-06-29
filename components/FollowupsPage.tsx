@@ -122,15 +122,17 @@ export default function FollowupsPage({ userName }: Props) {
     }
   }
 
-  const hotLeads = leads.filter(l => l.closer_status === "hot");
-  const coldLeads = leads.filter(l => l.closer_status === "cold" || !l.closer_status || l.closer_status === "new");
-  const otherLeads = leads.filter(l => l.closer_status && l.closer_status !== "hot" && l.closer_status !== "cold" && l.closer_status !== "new" && l.closer_status !== "");
+  // Exclude terminal states (lost, arrived) from followups
+  const activeFollowups = leads.filter(l => l.closer_status !== "lost" && l.closer_status !== "arrived");
+  const hotLeads = activeFollowups.filter(l => l.closer_status === "hot");
+  const coldLeads = activeFollowups.filter(l => l.closer_status === "cold" || !l.closer_status || l.closer_status === "new");
+  const otherLeads = activeFollowups.filter(l => l.closer_status && l.closer_status !== "hot" && l.closer_status !== "cold" && l.closer_status !== "new" && l.closer_status !== "");
 
 
 function sortLeads(list: Lead[]) {
   return [...list].sort((a, b) => {
-    const aP = a.followups.filter(f => f.status === "pending");
-    const bP = b.followups.filter(f => f.status === "pending");
+    const aP = (a.followups ?? []).filter(f => f.status === "pending");
+    const bP = (b.followups ?? []).filter(f => f.status === "pending");
     const aO = aP.some(f => f.scheduled_date < getTodayStr()) ? 0 : 1;
     const bO = bP.some(f => f.scheduled_date < getTodayStr()) ? 0 : 1;
     if (aO !== bO) return aO - bO;
@@ -141,7 +143,7 @@ function sortLeads(list: Lead[]) {
 }
   
   function renderLeadCard(lead: Lead) {
-    const pending = lead.followups.filter(f => f.status === "pending");
+    const pending = (lead.followups ?? []).filter(f => f.status === "pending");
     const tpKeys: [string, string, boolean][] = [
       ["1", "t1", lead.t1 as unknown as boolean],
       ["2", "t2", lead.t2 as unknown as boolean],
@@ -333,7 +335,7 @@ function sortLeads(list: Lead[]) {
       {renderSection("Cold Leads", <Snowflake className="h-5 w-5 text-blue-500" />, coldLeads, "bg-blue-500")}
       {otherLeads.length > 0 && renderSection("Other", <Clock className="h-5 w-5 text-neutral-500" />, otherLeads, "bg-neutral-500")}
 
-      {leads.length === 0 && !loading && (
+      {(!leads || leads.length === 0) && !loading && (
         <div className="text-center py-20">
           <Calendar className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
           <p className="text-lg font-semibold text-neutral-400 mb-1">No Pending Followups</p>

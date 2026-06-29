@@ -4,6 +4,7 @@ import {
   PhoneCall, CircleCheck, ListChecks, GitBranch, Flame,
   CircleAlert,
   Calendar,
+  PlaneLanding,
 } from "lucide-react";
 import { ReactNode, useState, useEffect, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
@@ -71,6 +72,7 @@ function ProgressRow({ label, value, count, color }: { label: string; value: num
       <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full`} style={{ width: `${value}%` }} />
       </div>
+
     </div>
   );
 }
@@ -95,6 +97,17 @@ function TeamRow({ name, leads, rate, status, color }: { name: string; leads: st
 }
 
 export function AdminDashboard({ oversight }: { oversight?: ReactNode }) {
+  const [leads, setLeads] = useState<Lead[]>([]);
+
+  useEffect(() => {
+    fetch("/api/leads?scope=all")
+      .then(r => r.ok ? r.json() : { leads: [] })
+      .then(d => setLeads(d.leads ?? []))
+      .catch(() => {});
+  }, []);
+
+  const arrivedLeads = leads.filter(l => l.closer_status === "arrived" && l.handoff_status === "accepted");
+
   return (
     <div>
       {/* KPI Row */}
@@ -151,6 +164,55 @@ export function AdminDashboard({ oversight }: { oversight?: ReactNode }) {
           </div>
         </div>
       </div>
+
+      {/* Arrived Leads */}
+      {arrivedLeads.length > 0 && (
+        <div className="mt-10">
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <PlaneLanding className="h-5 w-5 text-emerald-500" />
+            <h3 className="text-lg font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Arrived Leads</h3>
+            <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-emerald-500 text-white text-[11px] font-bold">
+              {arrivedLeads.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {arrivedLeads.map(lead => (
+              <div key={lead.id} className="bg-white border border-emerald-200 rounded-lg p-4 hover:border-emerald-400 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-white">{lead.name[0]}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <a href={`tel:${lead.phone}`} className="text-xs text-neutral-500 hover:text-gold transition-colors">{lead.phone}</a>
+                      </div>
+                    </div>
+                  </div>
+                  <StatusBadge label="Arrived" color="green" />
+                </div>
+                {lead.appointment_date && (
+                  <div className="flex items-center gap-1.5 mb-3 px-2 py-1 rounded-md bg-emerald-50 border border-emerald-200 w-fit">
+                    <Calendar className="h-3 w-3 text-emerald-600 shrink-0" />
+                    <span className="text-[10px] text-emerald-800">Appointment: {lead.appointment_date}</span>
+                  </div>
+                )}
+                <div className="pt-3 border-t border-neutral-100">
+                  <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">TOUCHPOINTS</p>
+                  <div className="flex gap-1.5">
+                    {[lead.t1, lead.t2, lead.t3, lead.t4, lead.t5, lead.t6].map((active, idx) => (
+                      <div key={idx} className={`h-7 w-7 rounded-full flex items-center justify-center ${active ? "bg-emerald-600 text-white" : "bg-neutral-50 text-neutral-300 border border-neutral-200"}`}>
+                        <span className="text-[10px] font-bold">T{idx + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -414,6 +476,8 @@ export function CloserDashboard() {
   const newCount = pipelineLeads.filter(l => l.closer_status === "new" || l.closer_status === "").length;
   const coldCount = pipelineLeads.filter(l => l.closer_status === "cold").length;
 
+  const arrivedLeads = leads.filter(l => l.closer_status === "arrived" && l.handoff_status === "accepted");
+
   function getStatusColor(status: string): string {
     if (status === "hot") return "red";
     if (status === "cold") return "gray";
@@ -512,6 +576,55 @@ export function CloserDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Arrived Leads */}
+      {arrivedLeads.length > 0 && (
+        <div className="mt-10">
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <PlaneLanding className="h-5 w-5 text-emerald-500" />
+            <h3 className="text-lg font-bold text-[#1a1a1a] tracking-tight font-['Adorn_Condensed','Halis','Inter',sans-serif]">Arrived Leads</h3>
+            <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-emerald-500 text-white text-[11px] font-bold">
+              {arrivedLeads.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {arrivedLeads.map(lead => (
+              <div key={lead.id} className="bg-white border border-emerald-200 rounded-lg p-4 hover:border-emerald-400 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-white">{lead.name[0]}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1a1a1a]">{lead.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <a href={`tel:${lead.phone}`} className="text-xs text-neutral-500 hover:text-gold transition-colors">{lead.phone}</a>
+                      </div>
+                    </div>
+                  </div>
+                  <StatusBadge label="Arrived" color="green" />
+                </div>
+                {lead.appointment_date && (
+                  <div className="flex items-center gap-1.5 mb-3 px-2 py-1 rounded-md bg-emerald-50 border border-emerald-200 w-fit">
+                    <Calendar className="h-3 w-3 text-emerald-600 shrink-0" />
+                    <span className="text-[10px] text-emerald-800">Appointment: {lead.appointment_date}</span>
+                  </div>
+                )}
+                <div className="pt-3 border-t border-neutral-100">
+                  <p className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 mb-2">TOUCHPOINTS</p>
+                  <div className="flex gap-1.5">
+                    {[lead.t1, lead.t2, lead.t3, lead.t4, lead.t5, lead.t6].map((active, idx) => (
+                      <div key={idx} className={`h-7 w-7 rounded-full flex items-center justify-center ${active ? "bg-emerald-600 text-white" : "bg-neutral-50 text-neutral-300 border border-neutral-200"}`}>
+                        <span className="text-[10px] font-bold">T{idx + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
